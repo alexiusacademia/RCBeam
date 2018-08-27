@@ -1,4 +1,4 @@
-package com.structuralengineering;
+package com.structuralengineering.rcbeam;
 
 import java.util.List;
 
@@ -23,7 +23,21 @@ public class BeamSection {
    * Methods
    * ******************************************
    */
+
+  /**
+   * Adds a single node to the beam section. Addition of nodes
+   * must follow a clockwise notation.
+   * @param node BeamSectionNode to be added.
+   */
   public void addNode(BeamSectionNode node) {
     this.section.add(node);
+  }
+
+  /**
+   * Removes a node at a specified index
+   * @param index
+   */
+  public void removeNode(int index) {
+
   }
 }

@@ -1,4 +1,4 @@
-package com.structuralengineering;
+package com.structuralengineering.rcbeam;
 
 public class BeamSectionNode {
   // Represents a node

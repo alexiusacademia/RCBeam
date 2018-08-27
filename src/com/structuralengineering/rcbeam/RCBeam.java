@@ -1,8 +1,6 @@
-package com.structuralengineering;
+package com.structuralengineering.rcbeam;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class RCBeam implements Serializable {
   /**
