@@ -17,4 +17,13 @@ public class BeamSection {
    * Empty constructor
    */
   public BeamSection() { }
+
+  /**
+   * ******************************************
+   * Methods
+   * ******************************************
+   */
+  public void addNode(BeamSectionNode node) {
+    this.section.add(node);
+  }
 }

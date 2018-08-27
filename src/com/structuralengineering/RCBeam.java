@@ -126,51 +126,6 @@ public class RCBeam implements Serializable {
     n = Es / Ec;
   }
 
-  // Analysis of beam right before cracking
-  public BeamAnalysisStage analyzeCrackStage() {
-    BeamAnalysisStage analysis = new BeamAnalysisStage();
 
-
-    return analysis;
-  }
-
-  // Analysis of the jerk after the concrete cracks at tension fiber
-  public BeamAnalysisStage analyzeAfterCrackStage() {
-    BeamAnalysisStage analysis = new BeamAnalysisStage();
-
-
-    return analysis;
-  }
-
-  // Analysis of yield of concrete at specified compression stress
-  public BeamAnalysisStage analyzeConcreteYieldStage(double fc) {
-    BeamAnalysisStage analysis = new BeamAnalysisStage();
-
-
-    return analysis;
-  }
-
-  // Analysis at yield of tension steel at specified tensile stress
-  public BeamAnalysisStage analyzeSteelYieldStage(double fs) {
-    BeamAnalysisStage analysis = new BeamAnalysisStage();
-
-    return analysis;
-  }
-
-  // List of analyses for the inelastic stage where concrete strain
-  // is greater than 0 and less than eo
-  public List<BeamAnalysisStage> analyzeInElasticStage1() {
-    List<BeamAnalysisStage> analyses = new ArrayList<>();
-
-    return analyses;
-  }
-
-  // List of analyses for the inelastic stage where concrete strain
-  // is greater than eo
-  public List<BeamAnalysisStage> analyzeInElasticStage2() {
-    List<BeamAnalysisStage> analyses = new ArrayList<>();
-
-    return analyses;
-  }
 
 }

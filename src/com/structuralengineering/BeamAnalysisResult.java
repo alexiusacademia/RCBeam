@@ -1,6 +1,6 @@
 package com.structuralengineering;
 
-public class BeamAnalysisStage {
+public class BeamAnalysisResult {
   private double momentC;
   private double curvatureC;
 
