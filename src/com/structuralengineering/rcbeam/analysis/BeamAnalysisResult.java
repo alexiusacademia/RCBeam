@@ -1,4 +1,4 @@
-package com.structuralengineering.rcbeam;
+package com.structuralengineering.rcbeam.analysis;
 
 public class BeamAnalysisResult {
   private double momentC;

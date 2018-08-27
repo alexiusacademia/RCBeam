@@ -1,4 +1,6 @@
-package com.structuralengineering.rcbeam;
+package com.structuralengineering.rcbeam.analysis;
+
+import com.structuralengineering.rcbeam.RCBeam;
 
 import java.util.ArrayList;
 import java.util.List;

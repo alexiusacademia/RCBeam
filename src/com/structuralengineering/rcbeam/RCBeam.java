@@ -1,5 +1,7 @@
 package com.structuralengineering.rcbeam;
 
+import com.structuralengineering.rcbeam.properties.BeamSection;
+
 import java.io.Serializable;
 
 public class RCBeam implements Serializable {
