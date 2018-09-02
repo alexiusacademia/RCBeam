@@ -1,5 +1,6 @@
 package com.structuralengineering.rcbeam.properties;
 
+import com.structuralengineering.rcbeam.utils.BeamContants;
 import com.structuralengineering.rcbeam.utils.Conversions;
 
 public class SteelTension {
@@ -19,6 +20,11 @@ public class SteelTension {
    * Actual tensile stress in steel
    */
   private double fs;
+
+  /**
+   * Actual strain caused by stress.
+   */
+  private double strain;
 
   // = = = = = = = = = = = = = = = = = = = = = =
   //
@@ -107,5 +113,28 @@ public class SteelTension {
    */
   public void setFs(double fs) {
     this.fs = fs;
+  }
+
+  // = = = = = = = = = = = = = = = = = = = = = =
+  //
+  // Methods
+  //
+  // = = = = = = = = = = = = = = = = = = = = = =
+
+  /**
+   * Calculate the strain from the stress.
+   */
+  private void calculateStrainFromStress() {
+    this.strain = this.fs / BeamContants.ES;
+  }
+
+  /**
+   * Calculate strain from the strain diagram using similar triangles.
+   * @param kd Distance from neutral axis to concrete extreme compression fiber.
+   * @param d Effective depth of beam.
+   * @param concreteStrain Strain in concrete extreme compression fiber.
+   */
+  public void calculateStrainFromDiagram(double kd, double d, double concreteStrain) {
+    this.strain = concreteStrain / kd * (d - kd);
   }
 }
