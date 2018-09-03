@@ -110,6 +110,14 @@ public class BeamSection {
         return modularRatio;
     }
 
+    /**
+     * Gets the steel tension object.
+     * @return steelTension
+     */
+    public SteelTension getSteelTension() {
+        return steelTension;
+    }
+
     // = = = = = = = = = = = = = = = = = = = = = =
     //
     // Setters
