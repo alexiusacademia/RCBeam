@@ -1,6 +1,7 @@
 package com.structuralengineering.rcbeam.analysis;
 
 import com.structuralengineering.rcbeam.RCBeam;
+import com.structuralengineering.rcbeam.properties.BeamSection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,13 +11,14 @@ import java.util.List;
  */
 public class BeamAnalyses {
   private RCBeam rcBeam;
+  private BeamSection beamSection;
 
   /**
-   * Constructor that provides the beam to be analyzed
-   * @param rcb RCBeam object
+   * Constructor that provides the beam section to be analyzed
+   * @param bSection BeamSection
    */
-  public BeamAnalyses(RCBeam rcb) {
-    this.rcBeam = rcb;
+  public BeamAnalyses(BeamSection bSection) {
+    this.beamSection = bSection;
   }
 
   /**
