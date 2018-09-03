@@ -2,6 +2,7 @@ package com.structuralengineering.rcbeam.analysis;
 
 import com.structuralengineering.rcbeam.RCBeam;
 import com.structuralengineering.rcbeam.properties.BeamSection;
+import com.structuralengineering.rcbeam.utils.Calculators;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +11,13 @@ import java.util.List;
  * Class for the various reinforced concrete beam analysis
  */
 public class BeamAnalyses {
-  private RCBeam rcBeam;
-  private BeamSection beamSection;
+  // = = = = = = = = = = = = = = = = = = = = = =
+  //
+  // Properties
+  //
+  // = = = = = = = = = = = = = = = = = = = = = =
+  private BeamSection beamSection;                          // Beam section to be analyzed
+  private double moment;                                    // Moment load in N-mm
 
   /**
    * Constructor that provides the beam section to be analyzed
@@ -33,6 +39,8 @@ public class BeamAnalyses {
    */
   public BeamAnalysisResult beforeCrackAnalysis() {
     BeamAnalysisResult analysis = new BeamAnalysisResult();
+
+    double At = Calculators.calculateArea(beamSection.getSection());      // Area of concrete alone
 
 
     return analysis;
