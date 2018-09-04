@@ -1,6 +1,9 @@
 package com.structuralengineering.rcbeam.analysis;
 
-import com.structuralengineering.rcbeam.RCBeam;
+import com.structuralengineering.rcbeam.properties.BeamSection;
+import com.structuralengineering.rcbeam.properties.BeamSectionNode;
+import com.structuralengineering.rcbeam.properties.SteelTension;
+import com.structuralengineering.rcbeam.utils.Calculators;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,14 +12,21 @@ import java.util.List;
  * Class for the various reinforced concrete beam analysis
  */
 public class BeamAnalyses {
-  private RCBeam rcBeam;
+  // = = = = = = = = = = = = = = = = = = = = = =
+  //
+  // Properties
+  //
+  // = = = = = = = = = = = = = = = = = = = = = =
+  private BeamSection beamSection;                          // Beam section to be analyzed
+  private double moment;                                    // Moment load in N-mm
+  private SteelTension steelTension;                        // Steel in tension property.
 
   /**
-   * Constructor that provides the beam to be analyzed
-   * @param rcb RCBeam object
+   * Constructor that provides the beam section to be analyzed
+   * @param bSection BeamSection
    */
-  public BeamAnalyses(RCBeam rcb) {
-    this.rcBeam = rcb;
+  public BeamAnalyses(BeamSection bSection) {
+    this.beamSection = bSection;
   }
 
   /**
@@ -31,7 +41,50 @@ public class BeamAnalyses {
    */
   public BeamAnalysisResult beforeCrackAnalysis() {
     BeamAnalysisResult analysis = new BeamAnalysisResult();
+    List<BeamSectionNode> beamSectionNodes = this.beamSection.getSection();
 
+    double fcprime = beamSection.getFcPrime();
+    double fr = beamSection.getFr();                                      // Modulus of rupture
+    double Ec = beamSection.getEc();                                      // Concrete secant modulus
+    double h = Calculators.highestY(beamSectionNodes) -
+            Calculators.lowestY(beamSectionNodes);
+    double Ac = Calculators.calculateArea(beamSectionNodes);              // Area of concrete alone
+    double yc = Calculators.calculateCentroidY(beamSectionNodes);         // Calculate centroid from extreme compression fiber.
+    double d = beamSection.getEffectiveDepth();
+
+    steelTension = beamSection.getSteelTension();
+    double As = steelTension.getTotalArea(true);                  // Get the steel area in tension
+    double ⲉo = beamSection.getConcreteStrainIndex();                     // ⲉo
+
+    double At = 0;                                                        // Total area of section (Transformed)
+    double n = 1;                                                         // Modular ratio
+
+    // Calculate total area including steel transformed
+    n = beamSection.getModularRatio();
+    At += Ac;
+    At += (n - 1) * As;
+
+    // Calculate moments of areas
+    double Ma = 0;
+    Ma += (n - 1) * As * beamSection.getEffectiveDepth();
+    Ma += Ac * yc;
+
+    double kd = 0;                                                        // Neutral axis to extreme compression fiber.
+    kd = Ma / At;
+    double kdY = Calculators.highestY(beamSectionNodes) - kd;             // Elevation of kd.
+
+    double ⲉc = (fr / Ec) / (h - kd) * kd;                                // Strain in concrete compression
+    double fc = ⲉc * Ec;                                                  // Concrete stress
+    double 𝜆o = ⲉc / ⲉo;                                                  // Ductility factor
+    double k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);                            // Compression resultant location factor
+    double Lo = solveForLo(𝜆o, true);
+    double compressionArea = Calculators.getAreaAboveAxis(kdY, beamSectionNodes);
+
+    double Mcr = Lo * fc * compressionArea * (d - k2 * kd);
+    double curvature = ⲉc / kd;
+
+    analysis.setMomentC(Mcr);
+    analysis.setCurvatureC(curvature);
 
     return analysis;
   }
@@ -81,6 +134,22 @@ public class BeamAnalyses {
     List<BeamAnalysisResult> analyses = new ArrayList<>();
 
     return analyses;
+  }
+
+  private double solveForLo(double ductilityFactor, boolean isElastic) {
+    if (isElastic) {
+      return 0.85 / 3 * ductilityFactor * (3 - ductilityFactor);
+    } else {
+      return 0.85 * (3 * ductilityFactor - 1) / (3 * ductilityFactor);
+    }
+  }
+
+  private static void printString(String str) {
+    System.out.println(str);
+  }
+
+  private static void printLine() {
+    printString("= = = = = = = = = = = = = = = = = = =");
   }
 
 }
