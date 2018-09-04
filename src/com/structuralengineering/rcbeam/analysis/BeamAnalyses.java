@@ -50,7 +50,8 @@ public class BeamAnalyses {
             Calculators.lowestY(beamSectionNodes);
     double Ac = Calculators.calculateArea(beamSectionNodes);              // Area of concrete alone
     double yc = Calculators.calculateCentroidY(beamSectionNodes);         // Calculate centroid from extreme compression fiber.
-    printString("Beam nodes = " + beamSectionNodes.size());
+    double d = beamSection.getEffectiveDepth();
+
     steelTension = beamSection.getSteelTension();
     double As = steelTension.getTotalArea(true);                  // Get the steel area in tension
     double ⲉo = beamSection.getConcreteStrainIndex();                     // ⲉo
@@ -79,14 +80,11 @@ public class BeamAnalyses {
     double Lo = solveForLo(𝜆o, true);
     double compressionArea = Calculators.getAreaAboveAxis(kdY, beamSectionNodes);
 
-    System.out.println("n = " + n);
-    System.out.println("kd = " + kd);
-    System.out.println("fr = " + fr);
-    System.out.println("ⲉc = " + ⲉc);
-    System.out.println("fc = " + fc);
-    System.out.println("\uD835\uDF06o = " + 𝜆o);
-    System.out.println("k2 = " + k2);
-    System.out.println("Compression area = " + compressionArea);
+    double Mcr = Lo * fc * compressionArea * (d - k2 * kd);
+    double curvature = ⲉc / kd;
+
+    analysis.setMomentC(Mcr);
+    analysis.setCurvatureC(curvature);
 
     return analysis;
   }

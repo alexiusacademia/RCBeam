@@ -1,6 +1,7 @@
 package com.structuralengineering.rcbeam;
 
 import com.structuralengineering.rcbeam.analysis.BeamAnalyses;
+import com.structuralengineering.rcbeam.analysis.BeamAnalysisResult;
 import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
 import com.structuralengineering.rcbeam.properties.SteelTension;
@@ -28,7 +29,10 @@ public class BeamAnalysisTester {
         bs.setSteelTension(st);
 
         BeamAnalyses analyses = new BeamAnalyses(bs);
-        analyses.beforeCrackAnalysis();
+        BeamAnalysisResult result = analyses.beforeCrackAnalysis();
+
+        printString("Mcr = " + String.valueOf(result.getMomentC() / Math.pow(1000, 2)));
+        printString("Curvature = " + String.valueOf(result.getCurvatureC()));
     }
 
     private static void printString(String str) {

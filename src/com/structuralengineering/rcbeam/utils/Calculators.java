@@ -13,10 +13,15 @@ public class Calculators {
      */
     public static double calculateArea(List<BeamSectionNode> nodes) {
         // Add the first node to the end of points.
-        nodes.add(nodes.get(0));
+        List<BeamSectionNode> newNodes = new ArrayList<>();
 
+        for (BeamSectionNode bsn : nodes) {
+            newNodes.add(bsn);
+        }
+
+        newNodes.add(nodes.get(0));
         // Number of nodes.
-        int n = nodes.size();
+        int n = newNodes.size();
 
         // Initialize area variable.
         double area = 0;
@@ -24,10 +29,10 @@ public class Calculators {
         int j;
 
         // Shoelace formula.
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n-1; i++) {
             j = (i + 1) % n;
-            area += nodes.get(i).getX() * nodes.get(j).getY();
-            area -= nodes.get(j).getX() * nodes.get(i).getY();
+            area += newNodes.get(i).getX() * newNodes.get(j).getY();
+            area -= newNodes.get(j).getX() * newNodes.get(i).getY();
         }
         area = Math.abs(area) / 2;
         return area;
@@ -36,21 +41,27 @@ public class Calculators {
     public static double calculateCentroidY(List<BeamSectionNode> nodes) {
         double kd = 0;
 
+        List<BeamSectionNode> newNodes = new ArrayList<>();
+
+        for (BeamSectionNode bsn : nodes) {
+            newNodes.add(bsn);
+        }
+
         // Add the first node to the end of points.
-        nodes.add(nodes.get(0));
+        newNodes.add(nodes.get(0));
 
         // Number of nodes.
-        int n = nodes.size();
+        int n = newNodes.size();
 
         double area = calculateArea(nodes);
 
-        double height = Math.abs(highestY(nodes) - lowestY(nodes));
+        double height = Math.abs(highestY(newNodes) - lowestY(newNodes));
 
         int j;
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n-1; i++) {
             j = (i + 1) % n;
-            kd += (nodes.get(i).getY() + nodes.get(i + 1).getY()) *
-                    (nodes.get(i).getX() * nodes.get(i+1).getY() - nodes.get(i+1).getX() * nodes.get(i).getY());
+            kd += (newNodes.get(i).getY() + newNodes.get(i + 1).getY()) *
+                    (newNodes.get(i).getX() * newNodes.get(i+1).getY() - newNodes.get(i+1).getX() * newNodes.get(i).getY());
         }
 
         kd = Math.abs(kd / (6 * area));
