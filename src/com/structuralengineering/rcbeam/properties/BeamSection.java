@@ -180,6 +180,14 @@ public class BeamSection {
         this.modularRatio = modularRatio;
     }
 
+    /**
+     * Sets SteelTension object.
+     * @param steelTension SteelTension object
+     */
+    public void setSteelTension(SteelTension steelTension) {
+        this.steelTension = steelTension;
+    }
+
     // = = = = = = = = = = = = = = = = = = = = = =
     //
     // Methods
@@ -206,15 +214,6 @@ public class BeamSection {
             // Remove the item
             this.section.remove(index);
         }
-    }
-
-    /**
-     * Sets the steel in tension area.
-     * @param area Area of steel.
-     * @param inMetric Metric preference.
-     */
-    public void setSteelTension(double area, boolean inMetric) {
-        this.steelTension.setTotalArea(area, inMetric);
     }
 
     /**
