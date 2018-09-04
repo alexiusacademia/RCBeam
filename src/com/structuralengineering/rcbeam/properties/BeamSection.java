@@ -138,6 +138,7 @@ public class BeamSection {
      */
     public void setFcPrime(double fcPrime) {
         this.fcPrime = fcPrime;
+        this.Ec = 4700 * Math.sqrt(fcPrime);
     }
 
     /**
@@ -154,22 +155,6 @@ public class BeamSection {
      */
     public void setdPrime(double dPrime) {
         this.dPrime = dPrime;
-    }
-
-    /**
-     * Sets the concrete secant modulus.
-     * @param ec Ec
-     */
-    public void setEc(double ec) {
-        this.Ec = ec;
-    }
-
-    /**
-     * Sets the modulus of elasticity of steel.
-     * @param es in MPa.
-     */
-    public void setEs(double es) {
-        Es = es;
     }
 
     /**
