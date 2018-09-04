@@ -1,5 +1,7 @@
 package com.structuralengineering.rcbeam.properties;
 
+import com.structuralengineering.rcbeam.utils.BeamContants;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,11 +21,10 @@ public class BeamSection {
     private double Ec;                                  // Concrete secant modulus in MPa. (Ec)
     private double Es;                                  // Modulus of elasticity of steel in MPa. (Es)
     private double modularRatio;                        // Modular ratio of steel to concrete. (n)
-    private double ductilityFactor;                     // Ductility factor, 𝜆
-    private double Lo;                                  // k1 * k2
-    private double ⲉo;                                  // ⲉo
+    private double concreteStrainIndex;                 // ⲉo
     private double β1;                                  // β1
     private double fcPrime = 0;                         // Concrete yield strength MPa
+    private double fr;                                  // Modulus of rupture
     private double fy = 0;                              // Steel yield strength MPa
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -39,7 +40,6 @@ public class BeamSection {
      */
     public BeamSection(List<BeamSectionNode> nodes) {
         // Initializations
-        this.section = new ArrayList<>();
         this.steelTension = new SteelTension();
 
         // Assignment
@@ -67,7 +67,7 @@ public class BeamSection {
      * @return section
      */
     public List<BeamSectionNode> getSection() {
-        return section;
+        return this.section;
     }
 
     /**
@@ -111,11 +111,35 @@ public class BeamSection {
     }
 
     /**
+     * Gets the modulus of rupture.
+     * @return fr
+     */
+    public double getFr() {
+        return fr;
+    }
+
+    /**
      * Gets the steel tension object.
      * @return steelTension
      */
     public SteelTension getSteelTension() {
         return steelTension;
+    }
+
+    /**
+     * Gets the concrete compressive strength.
+     * @return fc'
+     */
+    public double getFcPrime() {
+        return fcPrime;
+    }
+
+    /**
+     * Get ⲉo
+     * @return ⲉo
+     */
+    public double getConcreteStrainIndex() {
+        return concreteStrainIndex;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -138,7 +162,10 @@ public class BeamSection {
      */
     public void setFcPrime(double fcPrime) {
         this.fcPrime = fcPrime;
+        this.fr = 0.7 * Math.sqrt(fcPrime);
         this.Ec = 4700 * Math.sqrt(fcPrime);
+        this.modularRatio = BeamContants.ES / this.Ec;
+        this.concreteStrainIndex = 2 * 0.85 * this.fcPrime / this.Ec;
     }
 
     /**

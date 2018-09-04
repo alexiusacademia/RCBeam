@@ -2,6 +2,7 @@ package com.structuralengineering.rcbeam.utils;
 
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Calculators {
@@ -62,7 +63,7 @@ public class Calculators {
      * @param nodes Set of vertices.
      * @return Lowest y.
      */
-    private static double lowestY(List<BeamSectionNode> nodes) {
+    public static double lowestY(List<BeamSectionNode> nodes) {
         double lowest = nodes.get(0).getY();
 
         for (BeamSectionNode node : nodes) {
@@ -79,7 +80,7 @@ public class Calculators {
      * @param nodes Set of vertices.
      * @return Highest y.
      */
-    private static double highestY(List<BeamSectionNode> nodes) {
+    public static double highestY(List<BeamSectionNode> nodes) {
         double highest = nodes.get(0).getY();
 
         for (BeamSectionNode node : nodes) {
@@ -89,5 +90,51 @@ public class Calculators {
         }
 
         return highest;
+    }
+
+    public static double getAreaAboveAxis(double axisElevation, List<BeamSectionNode> nodes) {
+        // Hold the new nodes
+        List<BeamSectionNode> newNodes = new ArrayList<>();
+
+        int intersected = 0;
+        boolean isAbove = false;
+
+        double x1, x2, x3;
+        double y1, y2, y3;
+        y2 = axisElevation;
+
+        newNodes.add(nodes.get(0));
+
+        // Iterate to each node to look for intersection
+        for (int i = 1; i < nodes.size(); i++) {
+            if (intersected < 2) {
+                y1 = nodes.get(i-1).getY();
+                y3 = nodes.get(i).getY();
+                x1 = nodes.get(i-1).getX();
+                x3 = nodes.get(i).getX();
+                x2 = (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
+                if (y1 <= axisElevation && y3 > axisElevation) {
+                    // We got intersection
+                    newNodes.add(new BeamSectionNode(x2, y2));
+                    intersected++;
+                }
+                if (y1 >= axisElevation && y3 < axisElevation) {
+                    // We got intersection
+                    newNodes.add(new BeamSectionNode(x2, y2));
+                    intersected++;
+                }
+            }
+            newNodes.add(nodes.get(i));
+
+        }
+
+        // Now remove every node that is below the axis
+        for (int i = 0; i < newNodes.size(); i++) {
+            if (newNodes.get(i).getY() < axisElevation) {
+                newNodes.remove(newNodes.get(i));
+            }
+        }
+
+        return calculateArea(newNodes);
     }
 }
