@@ -42,10 +42,14 @@ public class BeamAnalyses {
   public BeamAnalysisResult beforeCrackAnalysis() {
     BeamAnalysisResult analysis = new BeamAnalysisResult();
 
-    double At = Calculators.calculateArea(beamSection.getSection());      // Area of concrete alone
+    double At = 0;                                                        // Total area of section (Transformed)
+    double Ac = Calculators.calculateArea(beamSection.getSection());      // Area of concrete alone
     steelTension = beamSection.getSteelTension();
     double As = steelTension.getTotalArea(true);                  // Get the steel area in tension
-    System.out.println(As);
+
+    // Calculate total area including steel
+    At += Ac;
+
 
     return analysis;
   }

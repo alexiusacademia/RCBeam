@@ -14,9 +14,10 @@ public class BeamAnalysisTester {
         bs.addNode(new BeamSectionNode(300,450));
         bs.addNode(new BeamSectionNode(300,0));
 
+        bs.setFcPrime(21);
+
         SteelTension st = new SteelTension();
         st.setTotalArea(1500, true);
-
 
         BeamAnalyses analyses = new BeamAnalyses(bs);
         analyses.beforeCrackAnalysis();
