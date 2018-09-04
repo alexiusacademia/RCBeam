@@ -2,6 +2,7 @@ package com.structuralengineering.rcbeam.analysis;
 
 import com.structuralengineering.rcbeam.RCBeam;
 import com.structuralengineering.rcbeam.properties.BeamSection;
+import com.structuralengineering.rcbeam.properties.SteelTension;
 import com.structuralengineering.rcbeam.utils.Calculators;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class BeamAnalyses {
   // = = = = = = = = = = = = = = = = = = = = = =
   private BeamSection beamSection;                          // Beam section to be analyzed
   private double moment;                                    // Moment load in N-mm
+  private SteelTension steelTension;                        // Steel in tension property.
 
   /**
    * Constructor that provides the beam section to be analyzed
@@ -41,7 +43,9 @@ public class BeamAnalyses {
     BeamAnalysisResult analysis = new BeamAnalysisResult();
 
     double At = Calculators.calculateArea(beamSection.getSection());      // Area of concrete alone
-
+    steelTension = beamSection.getSteelTension();
+    double As = steelTension.getTotalArea(true);                  // Get the steel area in tension
+    System.out.println(As);
 
     return analysis;
   }
