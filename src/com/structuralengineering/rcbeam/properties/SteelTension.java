@@ -6,7 +6,7 @@ import com.structuralengineering.rcbeam.utils.Conversions;
 public class SteelTension {
   // = = = = = = = = = = = = = = = = = = = = = =
   //
-  // Constants
+  // Properties
   //
   // = = = = = = = = = = = = = = = = = = = = = =
 
@@ -137,4 +137,6 @@ public class SteelTension {
   public void calculateStrainFromDiagram(double kd, double d, double concreteStrain) {
     this.strain = concreteStrain / kd * (d - kd);
   }
+
+
 }
