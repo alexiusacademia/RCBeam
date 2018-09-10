@@ -117,6 +117,10 @@ public class BeamSection {
         return steelTension;
     }
 
+    public SteelCompression getSteelCompression() {
+        return steelCompression;
+    }
+
     /**
      * Gets the concrete compressive strength.
      * @return fc'
@@ -181,6 +185,10 @@ public class BeamSection {
      */
     public void setSteelTension(SteelTension steelTension) {
         this.steelTension = steelTension;
+    }
+
+    public void setSteelCompression(SteelCompression steelCompression) {
+        this.steelCompression = steelCompression;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =

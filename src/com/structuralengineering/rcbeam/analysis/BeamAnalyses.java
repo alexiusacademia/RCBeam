@@ -2,6 +2,7 @@ package com.structuralengineering.rcbeam.analysis;
 
 import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
+import com.structuralengineering.rcbeam.properties.SteelCompression;
 import com.structuralengineering.rcbeam.properties.SteelTension;
 import com.structuralengineering.rcbeam.utils.Calculators;
 
@@ -20,6 +21,8 @@ public class BeamAnalyses {
   private BeamSection beamSection;                          // Beam section to be analyzed
   private double moment;                                    // Moment load in N-mm
   private SteelTension steelTension;                        // Steel in tension property.
+  private SteelCompression steelCompression;                // Steel in compression property
+  private double minimumSteelTensionArea;                   // Asmin, minimum reinforcement for the cracking stage
 
   /**
    * Constructor that provides the beam section to be analyzed
@@ -71,7 +74,7 @@ public class BeamAnalyses {
 
     double kd = 0;                                                        // Neutral axis to extreme compression fiber.
     kd = Ma / At;
-    double kdY = Calculators.highestY(beamSectionNodes) - kd;             // Elevation of kd.
+    double kdY = Calculators.highestY(beamSectionNodes) - kd;             // Elevation of kd
 
     double ⲉc = (fr / Ec) / (h - kd) * kd;                                // Strain in concrete compression
     double fc = ⲉc * Ec;                                                  // Concrete stress
@@ -95,6 +98,7 @@ public class BeamAnalyses {
    */
   public BeamAnalysisResult afterCrackAnalysis() {
     BeamAnalysisResult analysis = new BeamAnalysisResult();
+
 
 
     return analysis;
