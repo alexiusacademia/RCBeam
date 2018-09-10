@@ -22,6 +22,7 @@ public class BeamAnalysisTester {
 
         bs.setFcPrime(21);
         bs.setEffectiveDepth(400);
+        bs.setFy(275);
 
         SteelTension st = new SteelTension();
         st.setTotalArea(4539.927, true);
@@ -33,6 +34,7 @@ public class BeamAnalysisTester {
 
         printString("Mcr = " + String.valueOf(result.getMomentC() / Math.pow(1000, 2)));
         printString("Curvature = " + String.valueOf(result.getCurvatureC()));
+        printString("As(min) = " + String.valueOf(analyses.getMinimumSteelTensionArea()));
     }
 
     private static void printString(String str) {

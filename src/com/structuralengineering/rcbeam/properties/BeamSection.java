@@ -24,7 +24,7 @@ public class BeamSection {
     private double β1;                                  // β1
     private double fcPrime = 0;                         // Concrete yield strength MPa
     private double fr;                                  // Modulus of rupture
-    private double fy = 0;                              // Steel yield strength MPa
+    private double fy;                                  // Steel yield strength MPa
 
     // = = = = = = = = = = = = = = = = = = = = = =
     //
@@ -135,6 +135,14 @@ public class BeamSection {
      */
     public double getConcreteStrainIndex() {
         return concreteStrainIndex;
+    }
+
+    /**
+     * Get the steel tebsile strength
+     * @return fy
+     */
+    public double getFy() {
+        return fy;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =

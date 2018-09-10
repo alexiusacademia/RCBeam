@@ -4,6 +4,7 @@ import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
 import com.structuralengineering.rcbeam.properties.SteelCompression;
 import com.structuralengineering.rcbeam.properties.SteelTension;
+import com.structuralengineering.rcbeam.utils.BeamContants;
 import com.structuralengineering.rcbeam.utils.Calculators;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class BeamAnalyses {
   private SteelTension steelTension;                        // Steel in tension property.
   private SteelCompression steelCompression;                // Steel in compression property
   private double minimumSteelTensionArea;                   // Asmin, minimum reinforcement for the cracking stage
+  private double crackingMoment;                            // Mcr in N-mm
 
   /**
    * Constructor that provides the beam section to be analyzed
@@ -31,6 +33,17 @@ public class BeamAnalyses {
   public BeamAnalyses(BeamSection bSection) {
     this.beamSection = bSection;
   }
+
+  // = = = = = = = = = = = = = = = = = = = = = =
+  //
+  // Getters
+  //
+  // = = = = = = = = = = = = = = = = = = = = = =
+
+  public double getMinimumSteelTensionArea() {
+    return minimumSteelTensionArea;
+  }
+
 
   /**
    * ******************************************
@@ -54,6 +67,7 @@ public class BeamAnalyses {
     double Ac = Calculators.calculateArea(beamSectionNodes);              // Area of concrete alone
     double yc = Calculators.calculateCentroidY(beamSectionNodes);         // Calculate centroid from extreme compression fiber.
     double d = beamSection.getEffectiveDepth();
+    double fy = beamSection.getFy();
 
     steelTension = beamSection.getSteelTension();
     double As = steelTension.getTotalArea(true);                  // Get the steel area in tension
@@ -88,6 +102,28 @@ public class BeamAnalyses {
 
     analysis.setMomentC(Mcr);
     analysis.setCurvatureC(curvature);
+
+    // Calculate minimum tensile reinforcement required by the code
+    // Using the exact stress block distribution
+    // Try for new kd
+    kd = 0.001;
+    double Mcalculated = 0;
+    while (Mcalculated < Mcr) {
+      kd += 0.001;
+      ⲉc = fy * kd / (BeamContants.ES * (d - kd));
+      𝜆o = ⲉc / ⲉo;
+      k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
+      fc = ⲉc * Ec;
+      Lo = solveForLo(𝜆o, true);
+      kdY = Calculators.highestY(beamSectionNodes) - kd;
+      compressionArea = Calculators.getAreaAboveAxis(kdY, beamSectionNodes);
+      Mcalculated = Lo * fc * compressionArea * (d - k2 * kd);
+    }
+    printString("Mcalculated = " + String.valueOf(Mcalculated/Math.pow(1000,2)));
+    ⲉc = fy * kd / (BeamContants.ES * (d - kd));
+    𝜆o = ⲉc / ⲉo;
+    k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
+    this.minimumSteelTensionArea = Mcr / (fy * (d - k2 * kd));
 
     return analysis;
   }
