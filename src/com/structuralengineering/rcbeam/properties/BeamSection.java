@@ -14,10 +14,9 @@ public class BeamSection {
 
     private List<BeamSectionNode> section;              // Beam section definition.
     private SteelTension steelTension;                  // Tension steel property
+    private SteelCompression steelCompression;          // Compression steel property
     private double effectiveDepth;                      // Depth of tension steel from concrete
                                                         // extreme compression fiber in mm. (d)
-    private double dPrime;                              // Distance of compression steel to concrete
-                                                        // extreme compression fiber in mm. (d')
     private double Ec;                                  // Concrete secant modulus in MPa. (Ec)
     private double Es;                                  // Modulus of elasticity of steel in MPa. (Es)
     private double modularRatio;                        // Modular ratio of steel to concrete. (n)
@@ -76,14 +75,6 @@ public class BeamSection {
      */
     public double getEffectiveDepth() {
         return effectiveDepth;
-    }
-
-    /**
-     * Gets the d'
-     * @return d'
-     */
-    public double getdPrime() {
-        return dPrime;
     }
 
     /**
@@ -174,14 +165,6 @@ public class BeamSection {
      */
     public void setEffectiveDepth(double effectiveDepth) {
         this.effectiveDepth = effectiveDepth;
-    }
-
-    /**
-     * Sets the d'
-     * @param dPrime
-     */
-    public void setdPrime(double dPrime) {
-        this.dPrime = dPrime;
     }
 
     /**

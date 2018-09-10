@@ -9,27 +9,26 @@ public class SteelCompression {
     // Properties
     //
     // = = = = = = = = = = = = = = = = = = = = = =
-    /**
-     * Total area of steel
-     * Default is in square millimeters
-     */
-    private double totalArea;
 
-    /**
-     * Actual tensile stress in steel
-     */
-    private double fs;
-
-    /**
-     * Actual strain caused by stress.
-     */
-    private double strain;
+    private double totalArea;                           // Total area of steel. Default is in square millimeters
+    private double fs;                                  // Actual tensile stress in steel
+    private double strain;                              // Actual strain caused by stress.
+    private double dPrime;                              // Distance of compression steel to concrete
+                                                        // extreme compression fiber in mm. (d')
 
     // = = = = = = = = = = = = = = = = = = = = = =
     //
-    // Setters
+    // Getters
     //
     // = = = = = = = = = = = = = = = = = = = = = =
+    /**
+     * Gets the distance between compression steel centroid to concrete
+     * extreme compression fiber.
+     * @return d'
+     */
+    public double getdPrime() {
+        return dPrime;
+    }
 
     /**
      * Gets the total area in steel in specified format.
@@ -77,6 +76,14 @@ public class SteelCompression {
     // = = = = = = = = = = = = = = = = = = = = = =
 
     /**
+     * Sets the d' in millimeter
+     * @param dPrime d'
+     */
+    public void setdPrime(double dPrime) {
+        this.dPrime = dPrime;
+    }
+
+    /**
      * Sets the total area of steel in specified unit.
      * If inMetric is true, in square millimeter.
      * If inMetric is false, in square inches.
@@ -119,7 +126,6 @@ public class SteelCompression {
     // Methods
     //
     // = = = = = = = = = = = = = = = = = = = = = =
-
     /**
      * Calculate the strain from the stress.
      */
@@ -128,12 +134,13 @@ public class SteelCompression {
     }
 
     /**
-     * Calculate strain from the strain diagram using similar triangles.
+     * Calculate strain from the strain diagram using similar triangles with given
+     * concrete compression strain.
      * @param kd Distance from neutral axis to concrete extreme compression fiber.
      * @param d Effective depth of beam.
      * @param concreteStrain Strain in concrete extreme compression fiber.
      */
-    public void calculateStrainFromDiagram(double dPrime, double kd, double d, double concreteStrain) {
+    public void calculateStrainFromDiagram(double kd, double d, double concreteStrain) {
         this.strain = concreteStrain / kd * (kd - dPrime);
     }
 }
