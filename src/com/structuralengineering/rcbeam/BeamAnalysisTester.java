@@ -13,19 +13,22 @@ public class BeamAnalysisTester {
 
     public static void main(String[] args) {
         BeamSection bs = new BeamSection();
+        // Rectangular
+        /* bs.addNode(new BeamSectionNode(0,0));
+        bs.addNode(new BeamSectionNode(0,500));
+        bs.addNode(new BeamSectionNode(300,500));
+        bs.addNode(new BeamSectionNode(300,0)); */
+        // Triangular
         bs.addNode(new BeamSectionNode(0,0));
-        bs.addNode(new BeamSectionNode(0,450));
-        bs.addNode(new BeamSectionNode(300,450));
-        bs.addNode(new BeamSectionNode(300,0));
+        bs.addNode(new BeamSectionNode(150,600));
+        bs.addNode(new BeamSectionNode(300, 0));
 
-        printString("Beam nodes = " + bs.getSection().size());
-
-        bs.setFcPrime(21);
-        bs.setEffectiveDepth(400);
-        bs.setFy(275);
+        bs.setFcPrime(20);
+        bs.setEffectiveDepth(500);
+        bs.setFy(300);
 
         SteelTension st = new SteelTension();
-        st.setTotalArea(4539.927, true);
+        st.setTotalArea(1200, true);
 
         bs.setSteelTension(st);
 
@@ -35,6 +38,8 @@ public class BeamAnalysisTester {
         printString("Mcr = " + String.valueOf(result.getMomentC() / Math.pow(1000, 2)));
         printString("Curvature = " + String.valueOf(result.getCurvatureC()));
         printString("As(min) = " + String.valueOf(analyses.getMinimumSteelTensionArea()));
+
+        printString("Asprime = " + String.valueOf(bs.getSteelCompression().getTotalArea(true)));
     }
 
     private static void printString(String str) {

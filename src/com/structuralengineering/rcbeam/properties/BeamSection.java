@@ -52,6 +52,7 @@ public class BeamSection {
         // Initializations
         this.section = new ArrayList<>();
         this.steelTension = new SteelTension();
+        this.steelCompression = new SteelCompression();
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -165,7 +166,7 @@ public class BeamSection {
      */
     public void setFcPrime(double fcPrime) {
         this.fcPrime = fcPrime;
-        this.fr = 0.7 * Math.sqrt(fcPrime);
+        this.fr = 0.6 * Math.sqrt(fcPrime);
         this.Ec = 4700 * Math.sqrt(fcPrime);
         this.modularRatio = BeamContants.ES / this.Ec;
         this.concreteStrainIndex = 2 * 0.85 * this.fcPrime / this.Ec;
