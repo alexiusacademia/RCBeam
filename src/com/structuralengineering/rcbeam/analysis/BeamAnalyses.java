@@ -2,7 +2,9 @@ package com.structuralengineering.rcbeam.analysis;
 
 import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
+import com.structuralengineering.rcbeam.properties.SteelCompression;
 import com.structuralengineering.rcbeam.properties.SteelTension;
+import com.structuralengineering.rcbeam.utils.BeamContants;
 import com.structuralengineering.rcbeam.utils.Calculators;
 
 import java.util.ArrayList;
@@ -20,6 +22,9 @@ public class BeamAnalyses {
   private BeamSection beamSection;                          // Beam section to be analyzed
   private double moment;                                    // Moment load in N-mm
   private SteelTension steelTension;                        // Steel in tension property.
+  private SteelCompression steelCompression;                // Steel in compression property
+  private double minimumSteelTensionArea;                   // Asmin, minimum reinforcement for the cracking stage
+  private double crackingMoment;                            // Mcr in N-mm
 
   /**
    * Constructor that provides the beam section to be analyzed
@@ -29,11 +34,22 @@ public class BeamAnalyses {
     this.beamSection = bSection;
   }
 
-  /**
-   * ******************************************
-   * Methods
-   * ******************************************
-   */
+  // = = = = = = = = = = = = = = = = = = = = = =
+  //
+  // Getters
+  //
+  // = = = = = = = = = = = = = = = = = = = = = =
+
+  public double getMinimumSteelTensionArea() {
+    return minimumSteelTensionArea;
+  }
+
+
+  // = = = = = = = = = = = = = = = = = = = = = =
+  //
+  // Methods
+  //
+  // = = = = = = = = = = = = = = = = = = = = = =
 
   /**
    * Analyze the beam with the un-cracked section right before cracking.
@@ -51,9 +67,13 @@ public class BeamAnalyses {
     double Ac = Calculators.calculateArea(beamSectionNodes);              // Area of concrete alone
     double yc = Calculators.calculateCentroidY(beamSectionNodes);         // Calculate centroid from extreme compression fiber.
     double d = beamSection.getEffectiveDepth();
+    double dPrime = beamSection.getSteelCompression().getdPrime();
+    double fy = beamSection.getFy();
 
     steelTension = beamSection.getSteelTension();
+    steelCompression = beamSection.getSteelCompression();
     double As = steelTension.getTotalArea(true);                  // Get the steel area in tension
+    double AsPrime = steelCompression.getTotalArea(true);         // Get the steel area in compression
     double ⲉo = beamSection.getConcreteStrainIndex();                     // ⲉo
 
     double At = 0;                                                        // Total area of section (Transformed)
@@ -63,28 +83,68 @@ public class BeamAnalyses {
     n = beamSection.getModularRatio();
     At += Ac;
     At += (n - 1) * As;
+    At += (n - 1) * AsPrime;
 
     // Calculate moments of areas
     double Ma = 0;
-    Ma += (n - 1) * As * beamSection.getEffectiveDepth();
+    Ma += (n - 1) * As * d;
+    Ma += (n - 1) * AsPrime * dPrime;
     Ma += Ac * yc;
 
     double kd = 0;                                                        // Neutral axis to extreme compression fiber.
     kd = Ma / At;
-    double kdY = Calculators.highestY(beamSectionNodes) - kd;             // Elevation of kd.
+    double kdY = Calculators.highestY(beamSectionNodes) - kd;             // Elevation of kd
 
     double ⲉc = (fr / Ec) / (h - kd) * kd;                                // Strain in concrete compression
     double fc = ⲉc * Ec;                                                  // Concrete stress
-    double 𝜆o = ⲉc / ⲉo;                                                  // Ductility factor
-    double k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);                            // Compression resultant location factor
-    double Lo = solveForLo(𝜆o, true);
+    double fs = (fr * BeamContants.ES * (d - kd)) / (Ec * (h - kd));
+    double fsPrime = (fr * BeamContants.ES * (kd - dPrime)) / (Ec * (h - kd));
     double compressionArea = Calculators.getAreaAboveAxis(kdY, beamSectionNodes);
+    double tensionArea = Calculators.calculateArea(beamSectionNodes) - compressionArea;
 
-    double Mcr = Lo * fc * compressionArea * (d - k2 * kd);
+    double Cc, Cs, Tc, Ts;                                                // Resultant forces
+    Cc = 1 / 2.0 * fc * compressionArea;
+    Cs = AsPrime * fsPrime;
+    Tc = 1 / 2.0 * fr * tensionArea;
+    Ts = As * fs;
+
+    printString("Cc = " + Cc);
+    printString("Tc = " + Tc);
+    printString("Ts = " + Ts);
+
+    // Location of compression resultant
+    double ycc = (Cs * dPrime + Cc * kd / 3) / (Cs + Cc);
+
+    double Mcr = Ts * (d - ycc) + Tc * (h - ycc - (h - kd)/3);
+    printString("ycc = " + ycc);
     double curvature = ⲉc / kd;
 
     analysis.setMomentC(Mcr);
     analysis.setCurvatureC(curvature);
+
+    // Calculate minimum tensile reinforcement required by the code
+    // Using the exact stress block distribution
+    // Try for new kd
+    kd = 0.001;
+    double 𝜆o = 1;                                                        // Ductility factor
+    double k2 = 0;                                                        // Compression resultant location factor
+    double Lo = 0;
+    double Mcalculated = 0;
+    while (Mcalculated < Mcr) {
+      kd += 0.001;
+      ⲉc = fy * kd / (BeamContants.ES * (d - kd));
+      𝜆o = ⲉc / ⲉo;
+      k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
+      fc = ⲉc * Ec;
+      Lo = solveForLo(𝜆o, true);
+      kdY = Calculators.highestY(beamSectionNodes) - kd;
+      compressionArea = Calculators.getAreaAboveAxis(kdY, beamSectionNodes);
+      Mcalculated = Lo * fc * compressionArea * (d - k2 * kd);
+    }
+    ⲉc = fy * kd / (BeamContants.ES * (d - kd));
+    𝜆o = ⲉc / ⲉo;
+    k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
+    this.minimumSteelTensionArea = Mcr / (fy * (d - k2 * kd));
 
     return analysis;
   }
@@ -95,6 +155,7 @@ public class BeamAnalyses {
    */
   public BeamAnalysisResult afterCrackAnalysis() {
     BeamAnalysisResult analysis = new BeamAnalysisResult();
+
 
 
     return analysis;

@@ -24,7 +24,7 @@ public class BeamSection {
     private double β1;                                  // β1
     private double fcPrime = 0;                         // Concrete yield strength MPa
     private double fr;                                  // Modulus of rupture
-    private double fy = 0;                              // Steel yield strength MPa
+    private double fy;                                  // Steel yield strength MPa
 
     // = = = = = = = = = = = = = = = = = = = = = =
     //
@@ -52,6 +52,7 @@ public class BeamSection {
         // Initializations
         this.section = new ArrayList<>();
         this.steelTension = new SteelTension();
+        this.steelCompression = new SteelCompression();
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -117,6 +118,10 @@ public class BeamSection {
         return steelTension;
     }
 
+    public SteelCompression getSteelCompression() {
+        return steelCompression;
+    }
+
     /**
      * Gets the concrete compressive strength.
      * @return fc'
@@ -131,6 +136,14 @@ public class BeamSection {
      */
     public double getConcreteStrainIndex() {
         return concreteStrainIndex;
+    }
+
+    /**
+     * Get the steel tebsile strength
+     * @return fy
+     */
+    public double getFy() {
+        return fy;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -153,7 +166,7 @@ public class BeamSection {
      */
     public void setFcPrime(double fcPrime) {
         this.fcPrime = fcPrime;
-        this.fr = 0.7 * Math.sqrt(fcPrime);
+        this.fr = 0.6 * Math.sqrt(fcPrime);
         this.Ec = 4700 * Math.sqrt(fcPrime);
         this.modularRatio = BeamContants.ES / this.Ec;
         this.concreteStrainIndex = 2 * 0.85 * this.fcPrime / this.Ec;
@@ -181,6 +194,10 @@ public class BeamSection {
      */
     public void setSteelTension(SteelTension steelTension) {
         this.steelTension = steelTension;
+    }
+
+    public void setSteelCompression(SteelCompression steelCompression) {
+        this.steelCompression = steelCompression;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
