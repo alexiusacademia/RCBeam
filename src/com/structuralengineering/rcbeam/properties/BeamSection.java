@@ -1,6 +1,7 @@
 package com.structuralengineering.rcbeam.properties;
 
 import com.structuralengineering.rcbeam.utils.BeamContants;
+import com.structuralengineering.rcbeam.utils.Conversions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ public class BeamSection {
     private double fcPrime = 0;                         // Concrete yield strength MPa
     private double fr;                                  // Modulus of rupture
     private double fy;                                  // Steel yield strength MPa
+    private Unit unit;                                  // Unit to be used for all analysis
 
     // = = = = = = = = = = = = = = = = = = = = = =
     //
@@ -37,22 +39,34 @@ public class BeamSection {
      *
      * @param nodes A list of x,y coordinate that defines the beam geometry
      */
-    public BeamSection(List<BeamSectionNode> nodes) {
+    public BeamSection(List<BeamSectionNode> nodes, Unit u) {
         // Initializations
         this.steelTension = new SteelTension();
+        this.steelCompression = new SteelCompression();
 
-        // Assignment
+        // Assignments
         this.section = nodes;
+        this.unit = u;
     }
 
     /**
      * Empty constructor
+     * Sets the default unit to METRIC
      */
     public BeamSection() {
         // Initializations
         this.section = new ArrayList<>();
         this.steelTension = new SteelTension();
         this.steelCompression = new SteelCompression();
+        this.unit = Unit.METRIC;
+    }
+
+    /**
+     * Constructor that sets the unit for analysis.
+     * @param u Unit
+     */
+    public BeamSection(Unit u) {
+        this.unit = u;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -63,7 +77,6 @@ public class BeamSection {
 
     /**
      * Returns all the section nodes as ArrayList.
-     *
      * @return section
      */
     public List<BeamSectionNode> getSection() {
@@ -75,15 +88,15 @@ public class BeamSection {
      * @return effectiveDepth (d)
      */
     public double getEffectiveDepth() {
-        return effectiveDepth;
+        return Conversions.linearConverted(this.effectiveDepth, this.unit);
     }
 
     /**
      * Gets the concrete secant modulus.
-     * @return Ec in MPa.
+     * @return Ec.
      */
     public double getEc() {
-        return Ec;
+        return Conversions.pressureConverted(this.Ec, this.unit);
     }
 
     /**
@@ -91,7 +104,7 @@ public class BeamSection {
      * @return Es in MPa.
      */
     public double getEs() {
-        return Es;
+        return Conversions.pressureConverted(this.Es, this.unit);
     }
 
     /**
@@ -107,7 +120,7 @@ public class BeamSection {
      * @return fr
      */
     public double getFr() {
-        return fr;
+        return Conversions.pressureConverted(this.fr, this.unit);
     }
 
     /**
@@ -127,7 +140,7 @@ public class BeamSection {
      * @return fc'
      */
     public double getFcPrime() {
-        return fcPrime;
+        return Conversions.pressureConverted(this.fcPrime, this.unit);
     }
 
     /**
@@ -143,7 +156,15 @@ public class BeamSection {
      * @return fy
      */
     public double getFy() {
-        return fy;
+        return Conversions.pressureConverted(this.fy, this.unit);
+    }
+
+    /**
+     * Returns the unit
+     * @return unit
+     */
+    public Unit getUnit() {
+        return unit;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -158,6 +179,9 @@ public class BeamSection {
      */
     public void setFy(double fy) {
         this.fy = fy;
+        if (this.unit == Unit.ENGLISH) {
+            this.fy = Conversions.PSItoMPa(fy);
+        }
     }
 
     /**
@@ -166,18 +190,24 @@ public class BeamSection {
      */
     public void setFcPrime(double fcPrime) {
         this.fcPrime = fcPrime;
-        this.fr = 0.6 * Math.sqrt(fcPrime);
-        this.Ec = 4700 * Math.sqrt(fcPrime);
+        if (this.unit == Unit.ENGLISH) {
+            this.fcPrime = Conversions.PSItoMPa(fcPrime);
+        }
+        this.fr = 0.6 * Math.sqrt(this.fcPrime);
+        this.Ec = 4700 * Math.sqrt(this.fcPrime);
         this.modularRatio = BeamContants.ES / this.Ec;
         this.concreteStrainIndex = 2 * 0.85 * this.fcPrime / this.Ec;
     }
 
     /**
      * Sets the effective depth of the beam.
-     * @param effectiveDepth
+     * @param effectiveDepth effective depth
      */
     public void setEffectiveDepth(double effectiveDepth) {
         this.effectiveDepth = effectiveDepth;
+        if (this.unit == Unit.ENGLISH) {
+            this.effectiveDepth = Conversions.inTomm(effectiveDepth);
+        }
     }
 
     /**
@@ -196,8 +226,20 @@ public class BeamSection {
         this.steelTension = steelTension;
     }
 
+    /**
+     * Sets the SteelCompression object
+     * @param steelCompression SteelCompression object
+     */
     public void setSteelCompression(SteelCompression steelCompression) {
         this.steelCompression = steelCompression;
+    }
+
+    /**
+     * Sets the unit
+     * @param unit Unit
+     */
+    public void setUnit(Unit unit) {
+        this.unit = unit;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -234,4 +276,5 @@ public class BeamSection {
     private void calculateModularRatio() {
         this.modularRatio = this.Es / this.Ec;
     }
+
 }
