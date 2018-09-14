@@ -234,4 +234,5 @@ public class BeamSection {
     private void calculateModularRatio() {
         this.modularRatio = this.Es / this.Ec;
     }
+
 }
