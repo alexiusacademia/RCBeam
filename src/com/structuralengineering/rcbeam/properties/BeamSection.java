@@ -9,10 +9,14 @@ public class BeamSection {
   // Properties
   //
   // = = = = = = = = = = = = = = = = = = = = = =
-  /**
-   * Beam section definition.
-   */
-  private List<BeamSectionNode> section;
+  private List<BeamSectionNode> section;              // Beam section definition.
+  private Unit unit;
+
+  // = = = = = = = = = = = = = = = = = = = = = =
+  //
+  // Constructors
+  //
+  // = = = = = = = = = = = = = = = = = = = = = =
 
   /**
    * Constructor with defined section nodes
