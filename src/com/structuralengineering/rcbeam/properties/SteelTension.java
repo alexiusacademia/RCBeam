@@ -6,25 +6,13 @@ import com.structuralengineering.rcbeam.utils.Conversions;
 public class SteelTension {
   // = = = = = = = = = = = = = = = = = = = = = =
   //
-  // Constants
+  // Properties
   //
   // = = = = = = = = = = = = = = = = = = = = = =
 
-  /**
-   * Total area of steel
-   * Default is in square millimeters
-   */
-  private double totalArea;
-
-  /**
-   * Actual tensile stress in steel
-   */
-  private double fs;
-
-  /**
-   * Actual strain caused by stress.
-   */
-  private double strain;
+  private double totalArea;                           // Total area of steel. Default is in square millimeters
+  private double fs;                                  // Actual tensile stress in steel
+  private double strain;                              // Actual strain caused by stress.
 
   // = = = = = = = = = = = = = = = = = = = = = =
   //
@@ -137,4 +125,6 @@ public class SteelTension {
   public void calculateStrainFromDiagram(double kd, double d, double concreteStrain) {
     this.strain = concreteStrain / kd * (d - kd);
   }
+
+
 }
