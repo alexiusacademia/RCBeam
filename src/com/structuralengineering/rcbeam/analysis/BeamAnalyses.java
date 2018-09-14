@@ -25,6 +25,7 @@ public class BeamAnalyses {
   private SteelCompression steelCompression;                // Steel in compression property
   private double minimumSteelTensionArea;                   // Asmin, minimum reinforcement for the cracking stage
   private double crackingMoment;                            // Mcr in N-mm
+  private double curvatureAfterCracking;
 
   /**
    * Constructor that provides the beam section to be analyzed
@@ -44,6 +45,13 @@ public class BeamAnalyses {
     return minimumSteelTensionArea;
   }
 
+  public double getCrackingMoment() {
+    return crackingMoment;
+  }
+
+  public double getCurvatureAfterCracking() {
+    return curvatureAfterCracking;
+  }
 
   // = = = = = = = = = = = = = = = = = = = = = =
   //
@@ -101,23 +109,21 @@ public class BeamAnalyses {
     double fsPrime = (fr * BeamContants.ES * (kd - dPrime)) / (Ec * (h - kd));
     double compressionArea = Calculators.getAreaAboveAxis(kdY, beamSectionNodes);
     double tensionArea = Calculators.calculateArea(beamSectionNodes) - compressionArea;
-
+    printString("ⲉc = " + ⲉc);
+    printString("fc = " + fc);
+    printString("fs\' = " + fsPrime);
+    printString("fs = " + fs);
     double Cc, Cs, Tc, Ts;                                                // Resultant forces
-    Cc = 1 / 2.0 * fc * compressionArea;
-    Cs = AsPrime * fsPrime;
-    Tc = 1 / 2.0 * fr * tensionArea;
-    Ts = As * fs;
+    Cc = 1 / 2.0 * fc * compressionArea;                                  // Compression force on concrete
+    Cs = AsPrime * fsPrime;                                               // Compression force on steel
+    Tc = 1 / 2.0 * fr * tensionArea;                                      // Tensile force on concrete
+    Ts = As * fs;                                                         // Tensile force at steel
 
-    printString("Cc = " + Cc);
-    printString("Tc = " + Tc);
-    printString("Ts = " + Ts);
-
-    // Location of compression resultant
-    double ycc = (Cs * dPrime + Cc * kd / 3) / (Cs + Cc);
+    double ycc = (Cs * dPrime + Cc * kd / 3) / (Cs + Cc);                 // Location of compression resultant
 
     double Mcr = Ts * (d - ycc) + Tc * (h - ycc - (h - kd)/3);
-    printString("ycc = " + ycc);
     double curvature = ⲉc / kd;
+    this.crackingMoment = Mcr;
 
     analysis.setMomentC(Mcr);
     analysis.setCurvatureC(curvature);
@@ -145,7 +151,7 @@ public class BeamAnalyses {
     𝜆o = ⲉc / ⲉo;
     k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
     this.minimumSteelTensionArea = Mcr / (fy * (d - k2 * kd));
-
+    this.curvatureAfterCracking = ⲉc / kd;
     return analysis;
   }
 
@@ -155,8 +161,6 @@ public class BeamAnalyses {
    */
   public BeamAnalysisResult afterCrackAnalysis() {
     BeamAnalysisResult analysis = new BeamAnalysisResult();
-
-
 
     return analysis;
   }

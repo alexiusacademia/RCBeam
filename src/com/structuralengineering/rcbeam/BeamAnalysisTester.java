@@ -15,8 +15,8 @@ public class BeamAnalysisTester {
         BeamSection bs = new BeamSection();
         // Rectangular
         bs.addNode(new BeamSectionNode(0,0));
-        bs.addNode(new BeamSectionNode(0,500));
-        bs.addNode(new BeamSectionNode(300,500));
+        bs.addNode(new BeamSectionNode(0,450));
+        bs.addNode(new BeamSectionNode(300,450));
         bs.addNode(new BeamSectionNode(300,0));
         // Triangular
         /* bs.addNode(new BeamSectionNode(0,0));
@@ -24,11 +24,11 @@ public class BeamAnalysisTester {
         bs.addNode(new BeamSectionNode(300, 0)); */
 
         bs.setFcPrime(21);
-        bs.setEffectiveDepth(450);
+        bs.setEffectiveDepth(400);
         bs.setFy(275);
 
         SteelTension st = new SteelTension();
-        st.setTotalArea(1200, true);
+        st.setTotalArea(4539.92, true);
 
         bs.setSteelTension(st);
 
@@ -37,6 +37,7 @@ public class BeamAnalysisTester {
 
         printString("Mcr = " + String.valueOf(result.getMomentC() / Math.pow(1000, 2)));
         printString("Curvature = " + String.valueOf(result.getCurvatureC()));
+        printString("Curvature after cracking = " + analyses.getCurvatureAfterCracking());
         printString("As(min) = " + String.valueOf(analyses.getMinimumSteelTensionArea()));
     }
 
