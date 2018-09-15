@@ -79,4 +79,22 @@ public final class Conversions {
             return pressure;
         }
     }
+
+    /**
+     * Converts square millimeters to square inches
+     * @param area Area in square millimeters
+     * @return area in square inches
+     */
+    public static double toSquareInches(double area) {
+        return area / Math.pow(25.4, 2);
+    }
+
+    /**
+     * Converts square inches to square millimeters
+     * @param area Area in square inches.
+     * @return Area in square millimeters.
+     */
+    public static double toSquareMillimeters(double area) {
+        return area * Math.pow(25.4, 2);
+    }
 }
