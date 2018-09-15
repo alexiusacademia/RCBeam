@@ -11,6 +11,5 @@ public class BeamContants {
     /**
      * Maximum strain in concrete
      */
-    public static double ⲉcu = 0.003;
 
 }
