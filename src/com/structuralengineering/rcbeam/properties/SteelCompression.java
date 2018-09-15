@@ -12,7 +12,6 @@ public class SteelCompression {
 
     private double totalArea;                           // Total area of steel. Default is in square millimeters
     private double fs;                                  // Actual tensile stress in steel
-    private double strain;                              // Actual strain caused by stress.
     private double dPrime;                              // Distance of compression steel to concrete
                                                         // extreme compression fiber in mm. (d')
 
@@ -21,28 +20,33 @@ public class SteelCompression {
     // Getters
     //
     // = = = = = = = = = = = = = = = = = = = = = =
+
     /**
      * Gets the distance between compression steel centroid to concrete
      * extreme compression fiber.
+     * @param u Unit
      * @return d'
      */
-    public double getdPrime() {
-        return dPrime;
+    public double getdPrime(Unit u) {
+        if (u == Unit.ENGLISH) {
+            return Conversions.mmToIn(this.dPrime);
+        } else {
+            return dPrime;
+        }
     }
 
     /**
      * Gets the total area in steel in specified format.
      * If inMetric is true, in square millimeters.
      * If inMetric is false, in square inches.
-     * @param inMetric Metric preference.
+     * @param u Unit.
      * @return Steel area.
      */
-    public double getTotalArea(boolean inMetric) {
-        if (!inMetric) {
-            // Convert to english (square inches)
-            return Math.pow(Conversions.mmToIn(this.totalArea), 2);
+    public double getTotalArea(Unit u) {
+        if (u == Unit.ENGLISH) {
+            return Conversions.toSquareInches(this.totalArea);
         } else {
-            return totalArea;
+            return this.totalArea;
         }
     }
 
@@ -50,23 +54,15 @@ public class SteelCompression {
      * Returns the stess in the unit that is specified.
      * If inMetric is true, returns unit in MPa.
      * If inMetric is false, returns unit in PSI.
-     * @param inMetric Metric unit preference.
+     * @param u Unit
      * @return fs (MPa/PSI)
      */
-    public double getFs(boolean inMetric) {
-        if (!inMetric) {
-            return Conversions.MPatoPSI(fs);
+    public double getFs(Unit u) {
+        if (u == Unit.ENGLISH) {
+            return Conversions.MPatoPSI(this.fs);
+        } else {
+            return this.fs;
         }
-
-        return fs;
-    }
-
-    /**
-     * Returns stress in MPa unit.
-     * @return fs (MPa)
-     */
-    public double getFs() {
-        return fs;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -76,11 +72,16 @@ public class SteelCompression {
     // = = = = = = = = = = = = = = = = = = = = = =
 
     /**
-     * Sets the d' in millimeter
-     * @param dPrime d'
+     * Sets the d'.
+     * @param dPrime Distance from compression steel to extreme compression fiber of concrete.
+     * @param u Unit
      */
-    public void setdPrime(double dPrime) {
-        this.dPrime = dPrime;
+    public void setdPrime(double dPrime, Unit u) {
+        if (u == Unit.ENGLISH) {
+            this.dPrime = Conversions.inTomm(dPrime);
+        } else {
+            this.dPrime = dPrime;
+        }
     }
 
     /**
@@ -88,13 +89,13 @@ public class SteelCompression {
      * If inMetric is true, in square millimeter.
      * If inMetric is false, in square inches.
      * @param totalArea Area of steel.
-     * @param inMetric Metric preference.
+     * @param u Unit
      */
-    public void setTotalArea(double totalArea, boolean inMetric) {
-        if (inMetric) {
-            this.totalArea = totalArea;
+    public void setTotalArea(double totalArea, Unit u) {
+        if (u == Unit.ENGLISH) {
+            this.totalArea = Conversions.toSquareMillimeters(totalArea);
         } else {
-            this.totalArea = Math.pow(Conversions.inTomm(totalArea), 2);
+            this.totalArea = totalArea;
         }
     }
 
@@ -103,44 +104,19 @@ public class SteelCompression {
      * if inMetric is true, fs should be in MPa.
      * if inMetric is false, fs should be in PSI.
      * @param fs steel stress
-     * @param inMetric Metric unit preference.
+     * @param u Unit
      */
-    public void setFs(double fs, boolean inMetric) {
-        if (inMetric) {
-            this.fs = fs;
-        } else {
+    public void setFs(double fs, Unit u) {
+        if (u == Unit.ENGLISH) {
             this.fs = Conversions.PSItoMPa(fs);
+        } else {
+            this.fs = fs;
         }
     }
-
-    /**
-     * Sets the stress in MPa unit (default).
-     * @param fs steel stress.
-     */
-    public void setFs(double fs) {
-        this.fs = fs;
-    }
-
     // = = = = = = = = = = = = = = = = = = = = = =
     //
     // Methods
     //
     // = = = = = = = = = = = = = = = = = = = = = =
-    /**
-     * Calculate the strain from the stress.
-     */
-    private void calculateStrainFromStress() {
-        this.strain = this.fs / BeamContants.ES;
-    }
 
-    /**
-     * Calculate strain from the strain diagram using similar triangles with given
-     * concrete compression strain.
-     * @param kd Distance from neutral axis to concrete extreme compression fiber.
-     * @param d Effective depth of beam.
-     * @param concreteStrain Strain in concrete extreme compression fiber.
-     */
-    public void calculateStrainFromDiagram(double kd, double d, double concreteStrain) {
-        this.strain = concreteStrain / kd * (kd - dPrime);
-    }
 }

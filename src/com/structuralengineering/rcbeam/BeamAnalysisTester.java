@@ -5,6 +5,7 @@ import com.structuralengineering.rcbeam.analysis.BeamAnalysisResult;
 import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
 import com.structuralengineering.rcbeam.properties.SteelTension;
+import com.structuralengineering.rcbeam.properties.Unit;
 import com.structuralengineering.rcbeam.utils.Calculators;
 
 import java.util.List;
@@ -28,7 +29,8 @@ public class BeamAnalysisTester {
         bs.setFy(275);
 
         SteelTension st = new SteelTension();
-        st.setTotalArea(4539.92, true);
+      
+        st.setTotalArea(1200, Unit.METRIC);
 
         bs.setSteelTension(st);
 
