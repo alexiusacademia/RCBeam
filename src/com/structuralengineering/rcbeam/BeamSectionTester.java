@@ -3,6 +3,7 @@ package com.structuralengineering.rcbeam;
 import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
 import com.structuralengineering.rcbeam.utils.Calculators;
+import com.structuralengineering.rcbeam.utils.Conversions;
 
 public class BeamSectionTester {
   public static void main(String[] args) {
@@ -16,10 +17,7 @@ public class BeamSectionTester {
     bs.addNode(new BeamSectionNode(200,400));
     bs.addNode(new BeamSectionNode(200,0));
 
-    double area = Calculators.calculateArea(bs.getSection());
-    double y = Calculators.calculateCentroidY(bs.getSection());
-    printString("Area = " + String.valueOf(area));
-    printString("Centroid = " + String.valueOf(y));
+
   }
 
   private static void printString(String str) {

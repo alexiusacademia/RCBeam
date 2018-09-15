@@ -67,13 +67,13 @@ public class BeamAnalyses {
     double Ac = Calculators.calculateArea(beamSectionNodes);              // Area of concrete alone
     double yc = Calculators.calculateCentroidY(beamSectionNodes);         // Calculate centroid from extreme compression fiber.
     double d = beamSection.getEffectiveDepth();
-    double dPrime = beamSection.getSteelCompression().getdPrime();
+    double dPrime = beamSection.getSteelCompression().getdPrime(this.beamSection.getUnit());
     double fy = beamSection.getFy();
 
     steelTension = beamSection.getSteelTension();
     steelCompression = beamSection.getSteelCompression();
-    double As = steelTension.getTotalArea(true);                  // Get the steel area in tension
-    double AsPrime = steelCompression.getTotalArea(true);         // Get the steel area in compression
+    double As = steelTension.getTotalArea(this.beamSection.getUnit());                  // Get the steel area in tension
+    double AsPrime = steelCompression.getTotalArea(this.beamSection.getUnit());         // Get the steel area in compression
     double ⲉo = beamSection.getConcreteStrainIndex();                     // ⲉo
 
     double At = 0;                                                        // Total area of section (Transformed)
