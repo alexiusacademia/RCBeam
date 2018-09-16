@@ -147,10 +147,6 @@ public class Calculators {
             }
         }
 
-        for (BeamSectionNode bsn : newNodes) {
-            System.out.println(bsn.getX() + ", " + bsn.getY());
-        }
-
         return calculateArea(newNodes);
     }
 }
