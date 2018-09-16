@@ -1,6 +1,6 @@
 package com.structuralengineering.rcbeam.analysis;
 
 public enum StressDistribution {
-    EXACT,
+    PARABOLIC,
     WHITNEY
 }
