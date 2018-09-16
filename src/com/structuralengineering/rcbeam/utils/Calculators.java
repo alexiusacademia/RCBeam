@@ -1,6 +1,7 @@
 package com.structuralengineering.rcbeam.utils;
 
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,8 +115,6 @@ public class Calculators {
         double y1, y2, y3;
         y2 = axisElevation;
 
-        newNodes.add(nodes.get(0));
-
         // Iterate to each node to look for intersection
         for (int i = 1; i < nodes.size(); i++) {
             if (intersected < 2) {
@@ -135,8 +134,10 @@ public class Calculators {
                     intersected++;
                 }
             }
-            newNodes.add(nodes.get(i));
-
+            if (nodes.get(i).getY() >= axisElevation) {
+                // Add only nodes that are above or equal to the cutting axis elevation
+                newNodes.add(nodes.get(i));
+            }
         }
 
         // Now remove every node that is below the axis
@@ -144,6 +145,10 @@ public class Calculators {
             if (newNodes.get(i).getY() < axisElevation) {
                 newNodes.remove(newNodes.get(i));
             }
+        }
+
+        for (BeamSectionNode bsn : newNodes) {
+            System.out.println(bsn.getX() + ", " + bsn.getY());
         }
 
         return calculateArea(newNodes);
