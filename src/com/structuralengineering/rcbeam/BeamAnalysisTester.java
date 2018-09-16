@@ -2,6 +2,7 @@ package com.structuralengineering.rcbeam;
 
 import com.structuralengineering.rcbeam.analysis.BeamAnalyses;
 import com.structuralengineering.rcbeam.analysis.BeamAnalysisResult;
+import com.structuralengineering.rcbeam.analysis.StressDistribution;
 import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
 import com.structuralengineering.rcbeam.properties.SteelTension;
@@ -44,14 +45,12 @@ public class BeamAnalysisTester {
         bs.setSteelTension(st);
 
         BeamAnalyses analyses = new BeamAnalyses(bs);
-        BeamAnalysisResult result = analyses.beforeCrackAnalysis();
-        BeamAnalysisResult cap = analyses.beamCapacityAnalysis();
-
-        // printString("Mcr = " + String.valueOf(result.getMomentC() / Math.pow(1000, 2)));
-        // printString("Curvature = " + String.valueOf(result.getCurvatureC()));
-        // printString("Curvature after cracking = " + analyses.getCurvatureAfterCracking());
-        // printString("As(min) = " + String.valueOf(analyses.getMinimumSteelTensionArea()));
-        printString("Moment capacity = " + String.valueOf(cap.getMomentC()/ Math.pow(1000, 2)));
+        BeamAnalysisResult limitAnalysis1 = analyses.beamCapacityAnalysis(StressDistribution.WHITNEY);
+        double Mn = limitAnalysis1.getMomentC()/ Math.pow(1000, 2);
+        printString("Mn (Whitney) = " + String.valueOf(Math.round(Mn)) + " kN-m");
+        BeamAnalysisResult limitAnalysis2 = analyses.beamCapacityAnalysis(StressDistribution.PARABOLIC);
+        Mn = limitAnalysis2.getMomentC()/ Math.pow(1000, 2);
+        printString("Mn (Parabolic) = " + String.valueOf(Math.round(Mn)) + " kN-m");
     }
 
     private static void printString(String str) {

@@ -150,7 +150,7 @@ public class BeamAnalyses {
         return analysis;
     }
 
-    public BeamAnalysisResult beamCapacityAnalysis() {
+    public BeamAnalysisResult beamCapacityAnalysis(StressDistribution sd) {
         BeamAnalysisResult analysis = new BeamAnalysisResult();
 
         List<BeamSectionNode> nodes = this.beamSection.getSection();
@@ -172,37 +172,78 @@ public class BeamAnalyses {
                 kdY,
                 compressionArea;
 
-        // Find kd
-        double 𝜆o = 1;
-        double fsActual = 0;
+        double moment = 0;
         double AsCalc = 0;
         double kd = 0.001;
-        while (AsCalc < As) {
-            Lo = solveForLo(𝜆o, true);
-            kdY = Calculators.highestY(this.beamSection.getSection()) - kd;
-            compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
 
-            Cc = Lo * fc * compressionArea;
-            fs = ⲉcu * Es * (d - kd) / kd;
-            fsActual = fs;
+        if (sd == StressDistribution.PARABOLIC) {
+            // Find kd
+            double 𝜆o = 1;
+            while (AsCalc < As) {
+                Lo = solveForLo(𝜆o, true);
+                kdY = Calculators.highestY(this.beamSection.getSection()) - kd;
+                compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
 
-            if (fs >= fy) {
-                fs = fy;
+                Cc = Lo * fc * compressionArea;
+                fs = ⲉcu * Es * (d - kd) / kd;
+
+                if (fs >= fy) {
+                    fs = fy;
+                }
+                fsPrime = fs * (kd - dPrime) / (d - kd);
+                if (fsPrime > fy) {
+                    fsPrime = fy;
+                }
+
+                Cs = AsPrime * fsPrime;
+                AsCalc = (Cc + Cs) / fs;
+
+                kd += 0.0001;
+
             }
-            fsPrime = fs * (kd - dPrime) / (d - kd);
-            if (fsPrime > fy) {
-                fsPrime = fy;
+
+            k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
+            moment = Cc * (d - k2 * kd) + Cs * (d - dPrime);
+        } else {
+            double beta = 0.85;
+
+            if (fcPrime >= BeamContants.COMPRESSIVE_STRENGTH_THRESHOLD) {
+                beta = 0.85 - 0.05 / 7 * (fcPrime - BeamContants.COMPRESSIVE_STRENGTH_THRESHOLD);
             }
 
-            Cs = AsPrime * fsPrime;
-            AsCalc = (Cc + Cs) / fs;
+            // Limit beta to 0.65
+            if (beta < 0.65) {
+                beta = 0.65;
+            }
 
-            kd += 0.0001;
+            double a = 1;           // Compression block height
+
+            while (AsCalc < As) {
+                kd = a / beta;
+                fs = BeamContants.MAX_CONCRETE_STRAIN * BeamContants.ES * (d - kd) / kd;
+                if (fs >= fy) {
+                    fs = fy;
+                }
+                kdY = Calculators.highestY(this.beamSection.getSection()) - a;
+                compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
+
+                Cc = fc * compressionArea;
+
+                fsPrime = fs * (kd - dPrime) / (d - kd);
+                if (fsPrime > fy) {
+                    fsPrime = fy;
+                }
+
+                Cs = AsPrime * fsPrime;
+
+                AsCalc = (Cc + Cs) / fs;
+                moment = Cc * (d - a/2) + Cs * (d - dPrime);
+                a += 0.0001;
+            }
 
         }
 
-        k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
-        analysis.setMomentC(Cc * (d - k2 * kd) + Cs * (d - dPrime));
+        analysis.setMomentC(moment);
 
         return analysis;
     }
