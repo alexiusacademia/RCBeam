@@ -237,10 +237,9 @@ public class BeamAnalyses {
                 Cs = AsPrime * fsPrime;
 
                 AsCalc = (Cc + Cs) / fs;
-                moment = Cc * (d - a/2) + Cs * (d - dPrime);
                 a += 0.0001;
             }
-
+            moment = Cc * (d - a/2) + Cs * (d - dPrime);
         }
 
         analysis.setMomentC(moment);
