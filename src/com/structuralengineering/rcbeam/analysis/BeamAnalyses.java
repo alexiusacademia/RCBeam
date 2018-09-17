@@ -3,6 +3,7 @@ package com.structuralengineering.rcbeam.analysis;
 import com.structuralengineering.rcbeam.properties.*;
 import com.structuralengineering.rcbeam.utils.BeamContants;
 import com.structuralengineering.rcbeam.utils.Calculators;
+import com.structuralengineering.rcbeam.utils.Conversions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +17,15 @@ public class BeamAnalyses {
     // Properties
     //
     // = = = = = = = = = = = = = = = = = = = = = =
-    private BeamSection beamSection;                          // Beam section to be analyzed
-    private double moment;                                    // Moment load in N-mm
-    private SteelTension steelTension;                        // Steel in tension property.
-    private SteelCompression steelCompression;                // Steel in compression property
-    private double minimumSteelTensionArea;                   // Asmin, minimum reinforcement for the cracking stage
-    private double crackingMoment;                            // Mcr in N-mm
+    private BeamSection beamSection;                            // Beam section to be analyzed
+    private double moment;                                      // Moment load in N-mm
+    private SteelTension steelTension;                          // Steel in tension property.
+    private SteelCompression steelCompression;                  // Steel in compression property
+    private double minimumSteelTensionArea;                     // Asmin, minimum reinforcement for the cracking stage
+    private double crackingMoment;                              // Mcr in N-mm
     private double curvatureAfterCracking;
+    private double balacedSteelTension;                         // Required steel area for balanced design
+    private Unit unit;
 
     /**
      * Constructor that provides the beam section to be analyzed
@@ -31,6 +34,7 @@ public class BeamAnalyses {
      */
     public BeamAnalyses(BeamSection bSection) {
         this.beamSection = bSection;
+        this.unit = bSection.getUnit();
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -40,15 +44,31 @@ public class BeamAnalyses {
     // = = = = = = = = = = = = = = = = = = = = = =
 
     public double getMinimumSteelTensionArea() {
-        return minimumSteelTensionArea;
+        if (this.unit == Unit.ENGLISH) {
+            return Conversions.toSquareInches(minimumSteelTensionArea);
+        } else {
+            return minimumSteelTensionArea;
+        }
     }
 
     public double getCrackingMoment() {
-        return crackingMoment;
+        if (this.unit == Unit.ENGLISH) {
+            return Conversions.toEnglishMoment(crackingMoment);
+        } else {
+            return crackingMoment;
+        }
     }
 
     public double getCurvatureAfterCracking() {
         return curvatureAfterCracking;
+    }
+
+    public double getBalacedSteelTension() {
+        if (this.unit == Unit.ENGLISH) {
+            return Conversions.toSquareInches(this.balacedSteelTension);
+        } else {
+            return balacedSteelTension;
+        }
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -142,7 +162,7 @@ public class BeamAnalyses {
         double Es = BeamContants.ES;
         double d = this.beamSection.getEffectiveDepth();
         double dPrime = this.beamSection.getSteelCompression().getdPrime(Unit.METRIC);
-        double fs,
+        double fs = 0,
                 fy = this.beamSection.getFy(),
                 As = this.beamSection.getSteelTension().getTotalArea(Unit.METRIC),
                 AsPrime = this.beamSection.getSteelCompression().getTotalArea(Unit.METRIC),
@@ -151,8 +171,6 @@ public class BeamAnalyses {
                 Cs = 0,
                 fcPrime = this.beamSection.getFcPrime(),
                 fc = 0.85 * fcPrime,
-                k2,
-                Lo,
                 kdY = 0,
                 compressionArea;
 
@@ -163,48 +181,69 @@ public class BeamAnalyses {
 
         if (sd == StressDistribution.PARABOLIC) {
             // Find kd
-
+            int iterator = 1000;
+            double y = 0, b;                                                    // Distance from neutral axis and corresponding beam width
+            double dy = 0;                                                      // Strip for integration
+            double ⲉcy;                                                     // Concrete strain at y
+            double yElev;
             while (AsCalc < As) {
-                Cc = 0;
-                int iterator = 1000;
-                double y = 0, b = 0;
-                double dy = kd / iterator;
-                double ⲉcy;
-                double yElev;
-                for (int i = 0; i < iterator; i++) {
+                dy = kd / iterator;
+                for (int i = iterator; i > 0; i--) {
                     y = i * dy;
                     ⲉcy = ⲉcu * y / kd;
                     fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉcu - Math.pow((ⲉcy / ⲉcu), 2));
                     yElev = highestElev - kd + y;
                     b = Calculators.getBaseAtY(yElev, nodes);
                     Cc += fc * b * dy;
+
+                    fsPrime = fs * (kd - dPrime) / (d - kd);
+                    if (fsPrime > fy) {
+                        fsPrime = fy;
+                    }
+
+                    Cs = AsPrime * fsPrime;
+
+
                 }
+
                 fs = ⲉcu * Es * (d - kd) / kd;
+
                 if (fs >= fy) {
                     fs = fy;
                 }
-                AsCalc = Cc / fs;
-                kd += 0.1;
+                AsCalc = (Cc + Cs) / fs;
+                kd += 0.001;
             }
-            printString("kd = " + kd);
+            printString("Cc(parabolic) = " + Cc);
+            printString("kd(parabolic) = " + kd);
+
+            dy = kd / iterator;
+            double My = 0;
+            double compressionSolid = Cc;
+            double yBar;                                                    // Centroid of compression solid from top
+
+            for (int i = 0; i < iterator; i++) {
+                y = i * dy;
+                ⲉcy = ⲉcu * y / kd;
+                fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉcu - Math.pow((ⲉcy / ⲉcu), 2));
+                yElev = highestElev - kd + y;
+                b = Calculators.getBaseAtY(yElev, nodes);
+
+                Cc += fc * b * dy;
+                My += Cc * (kd - y);
+            }
+
+            yBar = My / compressionSolid;
+            printString("y-bar = " + yBar);
 
         } else {
-            double beta = 0.85;
-
-            if (fcPrime >= BeamContants.COMPRESSIVE_STRENGTH_THRESHOLD) {
-                beta = 0.85 - 0.05 / 7 * (fcPrime - BeamContants.COMPRESSIVE_STRENGTH_THRESHOLD);
-            }
-
-            // Limit beta to 0.65
-            if (beta < 0.65) {
-                beta = 0.65;
-            }
+            double beta = calculateBeta(fcPrime);
 
             double a = 1;           // Compression block height
 
             while (AsCalc < As) {
                 kd = a / beta;
-                fs = BeamContants.MAX_CONCRETE_STRAIN * BeamContants.ES * (d - kd) / kd;
+                fs = ⲉcu * Es * (d - kd) / kd;
                 if (fs >= fy) {
                     fs = fy;
                 }
@@ -226,7 +265,9 @@ public class BeamAnalyses {
 
             double compressionCentroid = 0;
             compressionCentroid = Calculators.getCentroidAboveAxis(kdY, nodes);
-            printString("C = " + String.valueOf(a / beta));
+            printString("kd(Whitney) = " + String.valueOf(a / beta));
+            printString("Cc(Whitney) = " + Cc);
+            printString("a(whitney) = " + a);
             moment = Cc * (d - compressionCentroid) + Cs * (d - dPrime);
         }
 
@@ -236,14 +277,50 @@ public class BeamAnalyses {
     }
 
     /**
-     * Analyze the beam right after the cracking occurs without additional loading.
-     *
-     * @return BeamAnalysisResult right after cracking.
+     * Analysis for balanced steel design
+     * @param sd Stress distribution block
+     * @return analysis
      */
-    public BeamAnalysisResult afterCrackAnalysis() {
-        BeamAnalysisResult analysis = new BeamAnalysisResult();
+    public BeamAnalysisResult balancedAnalysis(StressDistribution sd) {
+        BeamAnalysisResult result = new BeamAnalysisResult();
 
-        return analysis;
+        List<BeamSectionNode> nodes = this.beamSection.getSection();
+        double ⲉcu = BeamContants.MAX_CONCRETE_STRAIN;
+        double Es = BeamContants.ES;
+        double d = this.beamSection.getEffectiveDepth();
+        double dPrime = this.beamSection.getSteelCompression().getdPrime(Unit.METRIC);
+        double fs,
+                fy = this.beamSection.getFy(),
+                As = this.beamSection.getSteelTension().getTotalArea(Unit.METRIC),
+                AsPrime = this.beamSection.getSteelCompression().getTotalArea(Unit.METRIC),
+                fsPrime,
+                Cc = 0,
+                Cs = 0,
+                fcPrime = this.beamSection.getFcPrime(),
+                fc = 0.85 * fcPrime,
+                kdY = 0,
+                compressionArea;
+        double kd;
+        double Asb = 0;
+
+        kd = ⲉcu * Es * d / (fy + ⲉcu * Es);
+
+        if (sd == StressDistribution.PARABOLIC) {
+
+        } else {
+            // Whitney stress block
+            double beta = calculateBeta(fcPrime);
+            double a;
+            a = beta * kd;
+            kdY = Calculators.highestY(nodes) - a;
+            compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
+            Cc = 0.85 * fcPrime * compressionArea;
+
+            Asb = Cc / fy;
+        }
+        this.balacedSteelTension = Asb;
+        result.setKd(kd);
+        return result;
     }
 
     /**
@@ -276,4 +353,18 @@ public class BeamAnalyses {
         printString("= = = = = = = = = = = = = = = = = = =");
     }
 
+    private double calculateBeta(double fcPrime) {
+        double beta = 0.85;
+
+        if (fcPrime >= BeamContants.COMPRESSIVE_STRENGTH_THRESHOLD) {
+            beta = 0.85 - 0.05 / 7 * (fcPrime - BeamContants.COMPRESSIVE_STRENGTH_THRESHOLD);
+        }
+
+        // Limit beta to 0.65
+        if (beta < 0.65) {
+            beta = 0.65;
+        }
+
+        return beta;
+    }
 }

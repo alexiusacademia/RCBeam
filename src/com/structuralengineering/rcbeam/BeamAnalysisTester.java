@@ -22,9 +22,9 @@ public class BeamAnalysisTester {
         bs.addNode(new BeamSectionNode(300,450));
         bs.addNode(new BeamSectionNode(300,0)); */
         // Triangular
-        bs.addNode(new BeamSectionNode(0,0));
+        /*bs.addNode(new BeamSectionNode(0,0));
         bs.addNode(new BeamSectionNode(187.5,450));
-        bs.addNode(new BeamSectionNode(375, 0));
+        bs.addNode(new BeamSectionNode(375, 0));*/
         // T-Beam
         /* bs.addNode(new BeamSectionNode(0, 0));
         bs.addNode(new BeamSectionNode(0, 360));
@@ -34,9 +34,14 @@ public class BeamAnalysisTester {
         bs.addNode(new BeamSectionNode(1400, 360));
         bs.addNode(new BeamSectionNode(250, 360));
         bs.addNode(new BeamSectionNode(250, 0)); */
+        // Rectangular
+        bs.addNode(new BeamSectionNode(0, 0));
+        bs.addNode(new BeamSectionNode(0, 500));
+        bs.addNode(new BeamSectionNode(300, 500));
+        bs.addNode(new BeamSectionNode(300, 0));
 
         bs.setFcPrime(21);
-        bs.setEffectiveDepth(375);
+        bs.setEffectiveDepth(400);
         bs.setFy(345);
 
         SteelTension st = new SteelTension();
@@ -46,10 +51,6 @@ public class BeamAnalysisTester {
         bs.setSteelTension(st);
 
         BeamAnalyses analyses = new BeamAnalyses(bs);
-
-        BeamAnalysisResult minimumAnalysis = analyses.beforeCrackAnalysis();
-        printString("Mcr = " + minimumAnalysis.getMomentC() / Math.pow(1000, 2));
-        printString("As(min) = " + analyses.getMinimumSteelTensionArea());
 
         BeamAnalysisResult limitAnalysis1 = analyses.beamCapacityAnalysis(StressDistribution.WHITNEY);
         double Mn = limitAnalysis1.getMomentC();
