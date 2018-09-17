@@ -124,28 +124,12 @@ public class BeamAnalyses {
         analysis.setCurvatureC(curvature);
 
         // Calculate minimum tensile reinforcement required by the code
-        // Using the exact stress block distribution
-        // Try for new kd
-        kd = 0.001;
-        double 𝜆o = 1;                                                        // Ductility factor
-        double k2 = 0;                                                        // Compression resultant location factor
-        double Lo = 0;
-        double Mcalculated = 0;
-        while (Mcalculated < Mcr) {
-            kd += 0.001;
-            ⲉc = fy * kd / (BeamContants.ES * (d - kd));
-            𝜆o = ⲉc / ⲉo;
-            k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
-            fc = ⲉc * Ec;
-            Lo = solveForLo(𝜆o, true);
-            kdY = Calculators.highestY(beamSectionNodes) - kd;
-            compressionArea = Calculators.getAreaAboveAxis(kdY, beamSectionNodes);
-            Mcalculated = Lo * fc * compressionArea * (d - k2 * kd);
-        }
-        ⲉc = fy * kd / (BeamContants.ES * (d - kd));
-        𝜆o = ⲉc / ⲉo;
-        k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
-        this.minimumSteelTensionArea = Mcr / (fy * (d - k2 * kd));
+        double Asmin = 0;
+        double Tsmin = 0;
+        Tsmin = Cc + Cs - Tc;
+        Asmin = Tsmin / fy;
+
+        this.minimumSteelTensionArea = Asmin;
         this.curvatureAfterCracking = ⲉc / kd;
         return analysis;
     }
@@ -169,41 +153,41 @@ public class BeamAnalyses {
                 fc = 0.85 * fcPrime,
                 k2,
                 Lo,
-                kdY,
+                kdY = 0,
                 compressionArea;
 
         double moment = 0;
         double AsCalc = 0;
-        double kd = 0.001;
+        double kd = 0.1;
+        double highestElev = Calculators.highestY(nodes);
 
         if (sd == StressDistribution.PARABOLIC) {
             // Find kd
-            double 𝜆o = 1;
+
             while (AsCalc < As) {
-                Lo = solveForLo(𝜆o, true);
-                kdY = Calculators.highestY(this.beamSection.getSection()) - kd;
-                compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
-
-                Cc = Lo * fc * compressionArea;
+                Cc = 0;
+                int iterator = 1000;
+                double y = 0, b = 0;
+                double dy = kd / iterator;
+                double ⲉcy;
+                double yElev;
+                for (int i = 0; i < iterator; i++) {
+                    y = i * dy;
+                    ⲉcy = ⲉcu * y / kd;
+                    fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉcu - Math.pow((ⲉcy / ⲉcu), 2));
+                    yElev = highestElev - kd + y;
+                    b = Calculators.getBaseAtY(yElev, nodes);
+                    Cc += fc * b * dy;
+                }
                 fs = ⲉcu * Es * (d - kd) / kd;
-
                 if (fs >= fy) {
                     fs = fy;
                 }
-                fsPrime = fs * (kd - dPrime) / (d - kd);
-                if (fsPrime > fy) {
-                    fsPrime = fy;
-                }
-
-                Cs = AsPrime * fsPrime;
-                AsCalc = (Cc + Cs) / fs;
-
-                kd += 0.0001;
-
+                AsCalc = Cc / fs;
+                kd += 0.1;
             }
+            printString("kd = " + kd);
 
-            k2 = 1 / 4.0 * (4 - 𝜆o) / (3 - 𝜆o);
-            moment = Cc * (d - k2 * kd) + Cs * (d - dPrime);
         } else {
             double beta = 0.85;
 
@@ -224,7 +208,7 @@ public class BeamAnalyses {
                 if (fs >= fy) {
                     fs = fy;
                 }
-                kdY = Calculators.highestY(this.beamSection.getSection()) - a;
+                kdY = Calculators.highestY(nodes) - a;
                 compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
 
                 Cc = fc * compressionArea;
@@ -237,9 +221,13 @@ public class BeamAnalyses {
                 Cs = AsPrime * fsPrime;
 
                 AsCalc = (Cc + Cs) / fs;
-                a += 0.0001;
+                a += 0.001;
             }
-            moment = Cc * (d - a/2) + Cs * (d - dPrime);
+
+            double compressionCentroid = 0;
+            compressionCentroid = Calculators.getCentroidAboveAxis(kdY, nodes);
+            printString("C = " + String.valueOf(a / beta));
+            moment = Cc * (d - compressionCentroid) + Cs * (d - dPrime);
         }
 
         analysis.setMomentC(moment);
@@ -270,31 +258,6 @@ public class BeamAnalyses {
 
 
         return analysis;
-    }
-
-    /**
-     * Analyze the beam when the tension yields at a specified strength.
-     *
-     * @param fs Tension steel yield parameter
-     * @return BeamAnalysisResult for yield of tension steel.
-     */
-    public BeamAnalysisResult steelYieldAnalysis(double fs) {
-        BeamAnalysisResult analysis = new BeamAnalysisResult();
-
-        return analysis;
-    }
-
-    /**
-     * Analyze the beam for the inelastic stage.
-     * 1st stage is 0 < ec < eo
-     * 2nd stage is eo < ec < ecu
-     *
-     * @return List of BeamAnalysisResult for the inelastic stage.
-     */
-    public List<BeamAnalysisResult> inelasticStageAnalysis() {
-        List<BeamAnalysisResult> analyses = new ArrayList<>();
-
-        return analyses;
     }
 
     private double solveForLo(double ductilityFactor, boolean isElastic) {
