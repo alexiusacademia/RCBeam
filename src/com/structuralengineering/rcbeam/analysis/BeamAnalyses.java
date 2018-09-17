@@ -181,12 +181,14 @@ public class BeamAnalyses {
 
         if (sd == StressDistribution.PARABOLIC) {
             // Find kd
-            int iterator = 1000;
-            double y = 0, b;                                                    // Distance from neutral axis and corresponding beam width
-            double dy = 0;                                                      // Strip for integration
+            int iterator = 500;                                            // Divide kd by this number
+            double y, b;                                                    // Distance from neutral axis and corresponding beam width
+            double dy;                                                      // Strip for integration
             double ⲉcy;                                                     // Concrete strain at y
             double yElev;
             while (AsCalc < As) {
+                Cc = 0;                                                     // Reset Cc
+                Cs = 0;
                 dy = kd / iterator;
                 for (int i = iterator; i > 0; i--) {
                     y = i * dy;
@@ -196,45 +198,44 @@ public class BeamAnalyses {
                     b = Calculators.getBaseAtY(yElev, nodes);
                     Cc += fc * b * dy;
 
+                    fs = ⲉcu * Es * (d - kd) / kd;
+
+                    if (fs >= fy) {
+                        fs = fy;
+                    }
+
                     fsPrime = fs * (kd - dPrime) / (d - kd);
                     if (fsPrime > fy) {
                         fsPrime = fy;
                     }
 
-                    Cs = AsPrime * fsPrime;
-
-
-                }
-
-                fs = ⲉcu * Es * (d - kd) / kd;
-
-                if (fs >= fy) {
-                    fs = fy;
+                    Cs += AsPrime * fsPrime;
                 }
                 AsCalc = (Cc + Cs) / fs;
                 kd += 0.001;
             }
-            printString("Cc(parabolic) = " + Cc);
-            printString("kd(parabolic) = " + kd);
 
-            dy = kd / iterator;
             double My = 0;
             double compressionSolid = Cc;
+            double compressionSteel = Cs;
             double yBar;                                                    // Centroid of compression solid from top
-
-            for (int i = 0; i < iterator; i++) {
+            dy = kd / iterator;                                             // Reset dy
+            for (int i = iterator; i > 0; i--) {
                 y = i * dy;
                 ⲉcy = ⲉcu * y / kd;
                 fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉcu - Math.pow((ⲉcy / ⲉcu), 2));
                 yElev = highestElev - kd + y;
                 b = Calculators.getBaseAtY(yElev, nodes);
+                Cc = fc * b * dy;
 
-                Cc += fc * b * dy;
                 My += Cc * (kd - y);
             }
 
             yBar = My / compressionSolid;
-            printString("y-bar = " + yBar);
+
+            Cc = compressionSolid;
+            Cs = compressionSteel;
+            moment = Cc * (d - yBar) + Cs * (d - dPrime);
 
         } else {
             double beta = calculateBeta(fcPrime);
@@ -263,15 +264,15 @@ public class BeamAnalyses {
                 a += 0.001;
             }
 
-            double compressionCentroid = 0;
+            double compressionCentroid;
             compressionCentroid = Calculators.getCentroidAboveAxis(kdY, nodes);
-            printString("kd(Whitney) = " + String.valueOf(a / beta));
-            printString("Cc(Whitney) = " + Cc);
-            printString("a(whitney) = " + a);
+
             moment = Cc * (d - compressionCentroid) + Cs * (d - dPrime);
         }
 
         analysis.setMomentC(moment);
+        analysis.setKd(kd);
+        analysis.setCurvatureC(ⲉcu / kd);
 
         return analysis;
     }

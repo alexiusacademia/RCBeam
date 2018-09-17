@@ -26,27 +26,27 @@ public class BeamAnalysisTester {
         bs.addNode(new BeamSectionNode(187.5,450));
         bs.addNode(new BeamSectionNode(375, 0));*/
         // T-Beam
-        /* bs.addNode(new BeamSectionNode(0, 0));
+        bs.addNode(new BeamSectionNode(0, 0));
         bs.addNode(new BeamSectionNode(0, 360));
         bs.addNode(new BeamSectionNode(-1150, 360));
         bs.addNode(new BeamSectionNode(-1150, 485));
         bs.addNode(new BeamSectionNode(1400, 485));
         bs.addNode(new BeamSectionNode(1400, 360));
         bs.addNode(new BeamSectionNode(250, 360));
-        bs.addNode(new BeamSectionNode(250, 0)); */
+        bs.addNode(new BeamSectionNode(250, 0));
         // Rectangular
-        bs.addNode(new BeamSectionNode(0, 0));
+        /*bs.addNode(new BeamSectionNode(0, 0));
         bs.addNode(new BeamSectionNode(0, 500));
         bs.addNode(new BeamSectionNode(300, 500));
-        bs.addNode(new BeamSectionNode(300, 0));
+        bs.addNode(new BeamSectionNode(300, 0));*/
 
-        bs.setFcPrime(21);
-        bs.setEffectiveDepth(400);
-        bs.setFy(345);
+        bs.setFcPrime(20);
+        bs.setEffectiveDepth(435);
+        bs.setFy(300);
 
         SteelTension st = new SteelTension();
       
-        st.setTotalArea(1140.39, Unit.METRIC);
+        st.setTotalArea(17000, Unit.METRIC);
 
         bs.setSteelTension(st);
 
@@ -55,12 +55,14 @@ public class BeamAnalysisTester {
         BeamAnalysisResult limitAnalysis1 = analyses.beamCapacityAnalysis(StressDistribution.WHITNEY);
         double Mn = limitAnalysis1.getMomentC();
 
-        printString("Mn (Whitney) = " + String.valueOf(Math.round(Mn * 1000) / 1000) + " kN-m");
+        printString("Mn (Whitney) = " + String.valueOf(Math.round(Mn * 1000) / 1000 / Math.pow(1000, 2)));
+        printString("kd (Whitney) = " + limitAnalysis1.getKd());
 
         BeamAnalysisResult limitAnalysis2 = analyses.beamCapacityAnalysis(StressDistribution.PARABOLIC);
 
-        //Mn = limitAnalysis2.getMomentC()/ Math.pow(1000, 2);
-        //printString("Mn (Parabolic) = " + String.valueOf(Math.round(Mn)) + " kN-m");
+        Mn = limitAnalysis2.getMomentC();
+        printString("Mn (Parabolic) = " + String.valueOf(Math.round(Mn * 1000) / 1000 / Math.pow(1000, 2)));
+        printString("kd (Parabolic) = " + limitAnalysis2.getKd());
     }
 
     private static void printString(String str) {
