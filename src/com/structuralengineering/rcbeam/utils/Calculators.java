@@ -143,10 +143,6 @@ public class Calculators {
             }
         }
 
-        for (BeamSectionNode bsn : newNodes) {
-            System.out.println(bsn.getX() + ", " + bsn.getY());
-        }
-
         return calculateCentroidY(newNodes);
     }
 
@@ -194,5 +190,51 @@ public class Calculators {
         }
 
         return calculateArea(newNodes);
+    }
+
+    /**
+     * Calculate beam width at y from neutral axis
+     * @param yElev Elevation of point of interest
+     * @param nodes Beam nodes
+     * @return Width
+     */
+    public static double getBaseAtY(double yElev, List<BeamSectionNode> nodes) {
+        // Hold the new nodes
+        List<BeamSectionNode> newNodes = new ArrayList<>();
+
+        int intersected = 0;
+        boolean isAbove = false;
+
+        double x1, x2, x3;
+        double y1, y2, y3;
+        y2 = yElev;
+
+        // Iterate to each node to look for intersection
+        for (int i = 1; i < nodes.size(); i++) {
+            if (intersected < 2) {
+                y1 = nodes.get(i-1).getY();
+                y3 = nodes.get(i).getY();
+                x1 = nodes.get(i-1).getX();
+                x3 = nodes.get(i).getX();
+                x2 = (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
+                if (y1 <= yElev && y3 > yElev) {
+                    // We got intersection
+                    newNodes.add(new BeamSectionNode(x2, y2));
+                    intersected++;
+                }
+                if (y1 >= yElev && y3 < yElev) {
+                    // We got intersection
+                    newNodes.add(new BeamSectionNode(x2, y2));
+                    intersected++;
+                }
+            }
+        }
+
+        double width = 0;
+        if (newNodes.size() == 2) {
+            width = Math.abs(newNodes.get(0).getX() - newNodes.get(1).getX());
+        }
+
+        return width;
     }
 }
