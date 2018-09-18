@@ -117,7 +117,7 @@ public class BeamAnalyses {
         double kd = 0;                                                        // Neutral axis to extreme compression fiber.
         kd = Ma / At;
         double kdY = Calculators.highestY(beamSectionNodes) - kd;             // Elevation of kd
-
+        double highestElev = Calculators.highestY(beamSectionNodes);
         double ⲉc = (fr / Ec) / (h - kd) * kd;                                // Strain in concrete compression
         double fc = ⲉc * Ec;                                                  // Concrete stress
         double fs = (fr * BeamContants.ES * (d - kd)) / (Ec * (h - kd));
@@ -125,11 +125,13 @@ public class BeamAnalyses {
         double compressionArea = Calculators.getAreaAboveAxis(kdY, beamSectionNodes);
         double tensionArea = Calculators.calculateArea(beamSectionNodes) - compressionArea;
         double Cc, Cs, Tc, Ts;                                                // Resultant forces
-        Cc = 1 / 2.0 * fc * compressionArea;                                  // Compression force on concrete
-        Cs = AsPrime * fsPrime;                                               // Compression force on steel
-        Tc = 1 / 2.0 * fr * tensionArea;                                      // Tensile force on concrete
-        Ts = As * fs;                                                         // Tensile force at steel
 
+        Cc = compressionSolidVolumeTriangular(kd, highestElev, h, fr);
+        printString("Cc = " + String.valueOf(Cc));
+        Cs = AsPrime * fsPrime;                                               // Compression force on steel
+        // Tc = 1 / 2.0 * fr * tensionArea;                                      // Tensile force on concrete
+        Ts = As * fs;                                                         // Tensile force at steel
+        Tc = 0;
         double ycc = (Cs * dPrime + Cc * kd / 3) / (Cs + Cc);                 // Location of compression resultant
 
         double Mcr = Ts * (d - ycc) + Tc * (h - ycc - (h - kd) / 3);
@@ -183,12 +185,12 @@ public class BeamAnalyses {
 
         if (sd == StressDistribution.PARABOLIC) {
             // Find kd
-            int iterator = BeamContants.PARABOLIC_DY_ITERATION;                                            // Divide kd by this number
+            int iterator = BeamContants.COMPRESSION_SOLID_DY_ITERATION;                                            // Divide kd by this number
             double b;                                                    // Distance from neutral axis and corresponding beam width
             double dy;                                                      // Strip for integration
             while (AsCalc < As) {
                 Cs = 0;
-                Cc = parabolicCompressionSolid(fcPrime,
+                Cc = compressionSolidVolumeParabolic(fcPrime,
                         kd,
                         ⲉcu,
                         highestElev);
@@ -211,7 +213,7 @@ public class BeamAnalyses {
             double[] compressionStripComponent;
             dy = kd / iterator;                                             // Reset dy
             for (int i = iterator; i > 0; i--) {
-                compressionStripComponent = beamCompressionComponent(i, dy, ⲉcu, kd, fcPrime, highestElev);
+                compressionStripComponent = beamCompressionStripParabolic(i, dy, ⲉcu, kd, fcPrime, highestElev);
                 fc = compressionStripComponent[0];
                 b = compressionStripComponent[1];
                 Cc = fc * b * dy;
@@ -291,7 +293,7 @@ public class BeamAnalyses {
         kd = ⲉcu * Es * d / (fy + ⲉcu * Es);
 
         if (sd == StressDistribution.PARABOLIC) {
-            Cc = parabolicCompressionSolid(fcPrime,
+            Cc = compressionSolidVolumeParabolic(fcPrime,
                     kd,
                     ⲉcu,
                     highestElev);
@@ -356,18 +358,37 @@ public class BeamAnalyses {
      * @param highestElev top elevation of beam section
      * @return Cc
      */
-    private double parabolicCompressionSolid(double fcPrime,
-                                             double kd,
-                                             double ⲉcu,
-                                             double highestElev)
+    private double compressionSolidVolumeParabolic(double fcPrime,
+                                                   double kd,
+                                                   double ⲉcu,
+                                                   double highestElev)
     {
         List<BeamSectionNode> nodes = this.beamSection.getSection();
-        double y, ⲉcy, fc, yElev, b, Cc = 0;
-        int iterator = BeamContants.PARABOLIC_DY_ITERATION;
+        double fc, b, Cc = 0;
+        int iterator = BeamContants.COMPRESSION_SOLID_DY_ITERATION;
         double dy = kd / iterator;          // Strip height
         double[] compressionStripComponent;
         for (int i = iterator; i > 0; i--) {
-            compressionStripComponent = beamCompressionComponent(i, dy, ⲉcu, kd, fcPrime, highestElev);
+            compressionStripComponent = beamCompressionStripParabolic(i, dy, ⲉcu, kd, fcPrime, highestElev);
+            fc = compressionStripComponent[0];
+            b = compressionStripComponent[1];
+            Cc += fc * b * dy;
+        }
+        return Cc;
+    }
+
+    private double compressionSolidVolumeTriangular(double kd,
+                                                    double highestElev,
+                                                    double h,
+                                                    double fr)
+    {
+        List<BeamSectionNode> nodes = this.beamSection.getSection();
+        double fc, b, Cc = 0;
+        int iterator = BeamContants.COMPRESSION_SOLID_DY_ITERATION;
+        double dy = kd / iterator;          // Strip height
+        double[] compressionStripComponent;
+        for (int i = iterator; i > 0; i--) {
+            compressionStripComponent = beamCompressionStripTriangular(i, dy, kd, h, fr, highestElev);
             fc = compressionStripComponent[0];
             b = compressionStripComponent[1];
             Cc += fc * b * dy;
@@ -385,12 +406,12 @@ public class BeamAnalyses {
      * @param highestElev top elevation of beam section
      * @return Array consisting of b(y) and fc(y)
      */
-    private double[] beamCompressionComponent(int i,
-                                              double dy,
-                                              double ⲉcu,
-                                              double kd,
-                                              double fcPrime,
-                                              double highestElev) {
+    private double[] beamCompressionStripParabolic(int i,
+                                                   double dy,
+                                                   double ⲉcu,
+                                                   double kd,
+                                                   double fcPrime,
+                                                   double highestElev) {
         double[] result = new double[2];
         double y = i * dy;
         double ⲉcy = ⲉcu * y / kd;             // Strain at y
@@ -399,6 +420,36 @@ public class BeamAnalyses {
         double b = Calculators.getBaseAtY(yElev, this.beamSection.getSection());
         result[0] = fc;
         result[1] = b;
+        return result;
+    }
+
+    /**
+     * Beam compression solid strip
+     * @param i ith strip for integration
+     * @param dy height of strip
+     * @param kd trial or value of height of compression block
+     * @param h total beam height
+     * @param fr modulus of fructure of concrete
+     * @param highestElev top elevation of beam section
+     * @return Array consisting of b(y) and fc(y)
+     */
+    private double[] beamCompressionStripTriangular(int i,
+                                                    double dy,
+                                                    double kd,
+                                                    double h,
+                                                    double fr,
+                                                    double highestElev) {
+        double[] result = new double[2];
+
+        double y = i * dy;
+        double fc = fr * (h - kd) / kd;
+        double fcy = fc * y / kd;
+        double yElev = highestElev - kd + y;
+        double by = Calculators.getBaseAtY(yElev, this.beamSection.getSection());
+
+        result[0] = fcy;
+        result[1] = by;
+
         return result;
     }
 

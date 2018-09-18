@@ -13,14 +13,14 @@ public class BeamAnalysisTester {
     public static void main(String[] args) {
         BeamSection bs = new BeamSection();
         // Rectangular
-        bs.addNode(new BeamSectionNode(0,0));
+        /*bs.addNode(new BeamSectionNode(0,0));
         bs.addNode(new BeamSectionNode(0,450));
         bs.addNode(new BeamSectionNode(300,450));
-        bs.addNode(new BeamSectionNode(300,0));
+        bs.addNode(new BeamSectionNode(300,0));*/
         // Triangular
-        /*bs.addNode(new BeamSectionNode(0,0));
-        bs.addNode(new BeamSectionNode(187.5,450));
-        bs.addNode(new BeamSectionNode(375, 0));*/
+        bs.addNode(new BeamSectionNode(0,0));
+        bs.addNode(new BeamSectionNode(150,600));
+        bs.addNode(new BeamSectionNode(300, 0));
         // T-Beam
         /*bs.addNode(new BeamSectionNode(0, 0));
         bs.addNode(new BeamSectionNode(0, 360));
@@ -36,17 +36,19 @@ public class BeamAnalysisTester {
         bs.addNode(new BeamSectionNode(300, 500));
         bs.addNode(new BeamSectionNode(300, 0));*/
 
-        bs.setFcPrime(21);
-        bs.setEffectiveDepth(400);
-        bs.setFy(275);
+        bs.setFcPrime(20);
+        bs.setEffectiveDepth(550);
+        bs.setFy(300);
 
         SteelTension st = new SteelTension();
       
-        st.setTotalArea(17000, Unit.METRIC);
+        st.setTotalArea(0, Unit.METRIC);
 
         bs.setSteelTension(st);
 
         BeamAnalyses analyses = new BeamAnalyses(bs);
+
+        analyses.beforeCrackAnalysis();
 
         BeamAnalysisResult limitAnalysis1 = analyses.beamCapacityAnalysis(StressDistribution.WHITNEY);
         BeamAnalysisResult balancedAnalysis1 = analyses.balancedAnalysis(StressDistribution.WHITNEY);

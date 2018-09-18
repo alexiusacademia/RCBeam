@@ -19,5 +19,5 @@ public class BeamContants {
      */
     public static double COMPRESSIVE_STRENGTH_THRESHOLD = 30;
 
-    public static int PARABOLIC_DY_ITERATION = 500;
+    public static int COMPRESSION_SOLID_DY_ITERATION = 500;
 }
