@@ -1,6 +1,5 @@
 package com.structuralengineering.rcbeam.properties;
 
-import com.structuralengineering.rcbeam.utils.BeamContants;
 import com.structuralengineering.rcbeam.utils.Conversions;
 
 public class SteelTension {

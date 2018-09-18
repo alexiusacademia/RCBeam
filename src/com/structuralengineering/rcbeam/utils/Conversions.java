@@ -100,8 +100,8 @@ public final class Conversions {
 
     /**
      * Returns moment in lbs-ft
-     * @param momentInMetric
-     * @return
+     * @param momentInMetric Value of moment in N-mm.
+     * @return Value of moment in lbs-ft.
      */
     public static double toEnglishMoment(double momentInMetric) {
         double m = 0;

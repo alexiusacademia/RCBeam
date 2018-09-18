@@ -318,28 +318,7 @@ public class BeamAnalyses {
         return result;
     }
 
-    /**
-     * Analyze the beam when the concrete reaches a specified amount of stress in
-     * compression.
-     *
-     * @param fc The specified stress for the yielding of concrete.
-     * @return BeamAnalysisResult for yield of concrete.
-     */
     // TODO: 18/09/2018 concrete yield analysis
-    /*public BeamAnalysisResult concreteYieldAnalysis(double fc) {
-        BeamAnalysisResult analysis = new BeamAnalysisResult();
-
-
-        return analysis;
-    }*/
-/*
-    private double solveForLo(double ductilityFactor, boolean isElastic) {
-        if (isElastic) {
-            return 0.85 / 3 * ductilityFactor * (3 - ductilityFactor);
-        } else {
-            return 0.85 * (3 * ductilityFactor - 1) / (3 * ductilityFactor);
-        }
-    }*/
 
     private static void printString(String str) {
         System.out.println(str);
@@ -412,12 +391,14 @@ public class BeamAnalyses {
                                               double kd,
                                               double fcPrime,
                                               double highestElev) {
+        double[] result = new double[2];
         double y = i * dy;
         double ⲉcy = ⲉcu * y / kd;             // Strain at y
         double fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉcu - Math.pow((ⲉcy / ⲉcu), 2));
         double yElev = highestElev - kd + y;
         double b = Calculators.getBaseAtY(yElev, this.beamSection.getSection());
-        double[] result = {fc, b};
+        result[0] = fc;
+        result[1] = b;
         return result;
     }
 

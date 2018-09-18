@@ -1,8 +1,6 @@
 package com.structuralengineering.rcbeam.utils;
 
-import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,18 +118,15 @@ public class Calculators {
 
         // Iterate to each node to look for intersection
         for (int i = 1; i < nodes.size(); i++) {
+            y1 = nodes.get(i-1).getY();
+            y3 = nodes.get(i).getY();
+            x1 = nodes.get(i-1).getX();
+            x3 = nodes.get(i).getX();
+            x2 = (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
+
             if (intersected < 2) {
-                y1 = nodes.get(i-1).getY();
-                y3 = nodes.get(i).getY();
-                x1 = nodes.get(i-1).getX();
-                x3 = nodes.get(i).getX();
-                x2 = (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
-                if (y1 <= axisElevation && y3 > axisElevation) {
-                    // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
-                    intersected++;
-                }
-                if (y1 >= axisElevation && y3 < axisElevation) {
+                if ((y1 <= axisElevation && y3 > axisElevation) ||
+                        (y1 >= axisElevation && y3 < axisElevation)) {
                     // We got intersection
                     newNodes.add(new BeamSectionNode(x2, y2));
                     intersected++;
@@ -159,18 +154,16 @@ public class Calculators {
 
         // Iterate to each node to look for intersection
         for (int i = 1; i < nodes.size(); i++) {
+            y1 = nodes.get(i-1).getY();
+            y3 = nodes.get(i).getY();
+            x1 = nodes.get(i-1).getX();
+            x3 = nodes.get(i).getX();
+            x2 = interpolate(x1, x3, y1, y2, y3);
+
             if (intersected < 2) {
-                y1 = nodes.get(i-1).getY();
-                y3 = nodes.get(i).getY();
-                x1 = nodes.get(i-1).getX();
-                x3 = nodes.get(i).getX();
-                x2 = (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
-                if (y1 <= axisElevation && y3 > axisElevation) {
-                    // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
-                    intersected++;
-                }
-                if (y1 >= axisElevation && y3 < axisElevation) {
+
+                if ((y1 <= axisElevation && y3 > axisElevation) ||
+                        (y1 >= axisElevation && y3 < axisElevation)) {
                     // We got intersection
                     newNodes.add(new BeamSectionNode(x2, y2));
                     intersected++;
@@ -216,7 +209,7 @@ public class Calculators {
                 y3 = nodes.get(i).getY();
                 x1 = nodes.get(i-1).getX();
                 x3 = nodes.get(i).getX();
-                x2 = (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
+                x2 = interpolate(x1, x3, y1, y2, y3);
                 if (y1 <= yElev && y3 > yElev) {
                     // We got intersection
                     newNodes.add(new BeamSectionNode(x2, y2));
@@ -236,5 +229,10 @@ public class Calculators {
         }
 
         return width;
+    }
+
+    private static double interpolate(double x1, double x3, double y1,
+                               double y2, double y3) {
+        return (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
     }
 }
