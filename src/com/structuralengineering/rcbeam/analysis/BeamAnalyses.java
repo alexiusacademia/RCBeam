@@ -5,7 +5,6 @@ import com.structuralengineering.rcbeam.utils.BeamContants;
 import com.structuralengineering.rcbeam.utils.Calculators;
 import com.structuralengineering.rcbeam.utils.Conversions;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,8 +18,6 @@ public class BeamAnalyses {
     // = = = = = = = = = = = = = = = = = = = = = =
     private BeamSection beamSection;                            // Beam section to be analyzed
     private double moment;                                      // Moment load in N-mm
-    private SteelTension steelTension;                          // Steel in tension property.
-    private SteelCompression steelCompression;                  // Steel in compression property
     private double minimumSteelTensionArea;                     // Asmin, minimum reinforcement for the cracking stage
     private double crackingMoment;                              // Mcr in N-mm
     private double curvatureAfterCracking;
@@ -86,7 +83,6 @@ public class BeamAnalyses {
         BeamAnalysisResult analysis = new BeamAnalysisResult();
         List<BeamSectionNode> beamSectionNodes = this.beamSection.getSection();
 
-        double fcprime = beamSection.getFcPrime();
         double fr = beamSection.getFr();                                      // Modulus of rupture
         double Ec = beamSection.getEc();                                      // Concrete secant modulus
         double h = Calculators.highestY(beamSectionNodes) -
@@ -97,8 +93,8 @@ public class BeamAnalyses {
         double dPrime = beamSection.getSteelCompression().getdPrime(this.beamSection.getUnit());
         double fy = beamSection.getFy();
 
-        steelTension = beamSection.getSteelTension();
-        steelCompression = beamSection.getSteelCompression();
+        SteelTension steelTension = beamSection.getSteelTension();
+        SteelCompression steelCompression = beamSection.getSteelCompression();
         double As = steelTension.getTotalArea(this.beamSection.getUnit());                  // Get the steel area in tension
         double AsPrime = steelCompression.getTotalArea(this.beamSection.getUnit());         // Get the steel area in compression
         double ⲉo = beamSection.getConcreteStrainIndex();                     // ⲉo
@@ -146,6 +142,7 @@ public class BeamAnalyses {
         // Calculate minimum tensile reinforcement required by the code
         double Asmin = 0;
         double Tsmin = 0;
+        // TODO: 18/09/2018 Recalculate As minimum 
         Tsmin = Cc + Cs - Tc;
         Asmin = Tsmin / fy;
 
@@ -154,6 +151,11 @@ public class BeamAnalyses {
         return analysis;
     }
 
+    /**
+     * Analyze the capacity of beam with given section and reinforcements.
+     * @param sd Stress distribution type.
+     * @return BeamAnalysisResult
+     */
     public BeamAnalysisResult beamCapacityAnalysis(StressDistribution sd) {
         BeamAnalysisResult analysis = new BeamAnalysisResult();
 
@@ -181,36 +183,23 @@ public class BeamAnalyses {
 
         if (sd == StressDistribution.PARABOLIC) {
             // Find kd
-            int iterator = 500;                                            // Divide kd by this number
-            double y, b;                                                    // Distance from neutral axis and corresponding beam width
+            int iterator = BeamContants.PARABOLIC_DY_ITERATION;                                            // Divide kd by this number
+            double b;                                                    // Distance from neutral axis and corresponding beam width
             double dy;                                                      // Strip for integration
-            double ⲉcy;                                                     // Concrete strain at y
-            double yElev;
             while (AsCalc < As) {
-                Cc = 0;                                                     // Reset Cc
                 Cs = 0;
-                dy = kd / iterator;
-                for (int i = iterator; i > 0; i--) {
-                    y = i * dy;
-                    ⲉcy = ⲉcu * y / kd;
-                    fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉcu - Math.pow((ⲉcy / ⲉcu), 2));
-                    yElev = highestElev - kd + y;
-                    b = Calculators.getBaseAtY(yElev, nodes);
-                    Cc += fc * b * dy;
+                Cc = parabolicCompressionSolid(fcPrime,
+                        kd,
+                        ⲉcu,
+                        highestElev);
+                fs = ⲉcu * Es * (d - kd) / kd;
+                fs = calculateFs(fs, fy);
 
-                    fs = ⲉcu * Es * (d - kd) / kd;
+                fsPrime = fs * (kd - dPrime) / (d - kd);
+                fsPrime = calculateFs(fsPrime, fy);
 
-                    if (fs >= fy) {
-                        fs = fy;
-                    }
+                Cs += AsPrime * fsPrime;
 
-                    fsPrime = fs * (kd - dPrime) / (d - kd);
-                    if (fsPrime > fy) {
-                        fsPrime = fy;
-                    }
-
-                    Cs += AsPrime * fsPrime;
-                }
                 AsCalc = (Cc + Cs) / fs;
                 kd += 0.001;
             }
@@ -219,16 +208,15 @@ public class BeamAnalyses {
             double compressionSolid = Cc;
             double compressionSteel = Cs;
             double yBar;                                                    // Centroid of compression solid from top
+            double[] compressionStripComponent;
             dy = kd / iterator;                                             // Reset dy
             for (int i = iterator; i > 0; i--) {
-                y = i * dy;
-                ⲉcy = ⲉcu * y / kd;
-                fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉcu - Math.pow((ⲉcy / ⲉcu), 2));
-                yElev = highestElev - kd + y;
-                b = Calculators.getBaseAtY(yElev, nodes);
+                compressionStripComponent = beamCompressionComponent(i, dy, ⲉcu, kd, fcPrime, highestElev);
+                fc = compressionStripComponent[0];
+                b = compressionStripComponent[1];
                 Cc = fc * b * dy;
 
-                My += Cc * (kd - y);
+                My += Cc * (kd - i * dy);
             }
 
             yBar = My / compressionSolid;
@@ -245,18 +233,15 @@ public class BeamAnalyses {
             while (AsCalc < As) {
                 kd = a / beta;
                 fs = ⲉcu * Es * (d - kd) / kd;
-                if (fs >= fy) {
-                    fs = fy;
-                }
+                fs = calculateFs(fs, fy);
+
                 kdY = Calculators.highestY(nodes) - a;
                 compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
 
                 Cc = fc * compressionArea;
 
                 fsPrime = fs * (kd - dPrime) / (d - kd);
-                if (fsPrime > fy) {
-                    fsPrime = fy;
-                }
+                fsPrime = calculateFs(fsPrime, fy);
 
                 Cs = AsPrime * fsPrime;
 
@@ -290,24 +275,29 @@ public class BeamAnalyses {
         double Es = BeamContants.ES;
         double d = this.beamSection.getEffectiveDepth();
         double dPrime = this.beamSection.getSteelCompression().getdPrime(Unit.METRIC);
-        double fs,
-                fy = this.beamSection.getFy(),
-                As = this.beamSection.getSteelTension().getTotalArea(Unit.METRIC),
+        double fy = this.beamSection.getFy(),
                 AsPrime = this.beamSection.getSteelCompression().getTotalArea(Unit.METRIC),
                 fsPrime,
-                Cc = 0,
-                Cs = 0,
+                Cc,
+                Cs,
                 fcPrime = this.beamSection.getFcPrime(),
                 fc = 0.85 * fcPrime,
-                kdY = 0,
+                kdY,
                 compressionArea;
         double kd;
         double Asb = 0;
+        double highestElev = Calculators.highestY(nodes);
 
         kd = ⲉcu * Es * d / (fy + ⲉcu * Es);
 
         if (sd == StressDistribution.PARABOLIC) {
-
+            Cc = parabolicCompressionSolid(fcPrime,
+                    kd,
+                    ⲉcu,
+                    highestElev);
+            fsPrime = ⲉcu * Es * (kd - dPrime) / kd;
+            fsPrime = calculateFs(fsPrime, fy);
+            Cs = AsPrime * fsPrime;
         } else {
             // Whitney stress block
             double beta = calculateBeta(fcPrime);
@@ -315,11 +305,15 @@ public class BeamAnalyses {
             a = beta * kd;
             kdY = Calculators.highestY(nodes) - a;
             compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
-            Cc = 0.85 * fcPrime * compressionArea;
-
-            Asb = Cc / fy;
+            Cc = fc * compressionArea;
+            fsPrime = ⲉcu * Es * (kd - dPrime) / kd;
+            fsPrime = calculateFs(fsPrime, fy);
+            Cs = AsPrime * fsPrime;
         }
+        Asb = (Cc + Cs) / fy;
         this.balacedSteelTension = Asb;
+
+        result.setCurvatureC(ⲉcu / kd);
         result.setKd(kd);
         return result;
     }
@@ -331,20 +325,21 @@ public class BeamAnalyses {
      * @param fc The specified stress for the yielding of concrete.
      * @return BeamAnalysisResult for yield of concrete.
      */
-    public BeamAnalysisResult concreteYieldAnalysis(double fc) {
+    // TODO: 18/09/2018 concrete yield analysis
+    /*public BeamAnalysisResult concreteYieldAnalysis(double fc) {
         BeamAnalysisResult analysis = new BeamAnalysisResult();
 
 
         return analysis;
-    }
-
+    }*/
+/*
     private double solveForLo(double ductilityFactor, boolean isElastic) {
         if (isElastic) {
             return 0.85 / 3 * ductilityFactor * (3 - ductilityFactor);
         } else {
             return 0.85 * (3 * ductilityFactor - 1) / (3 * ductilityFactor);
         }
-    }
+    }*/
 
     private static void printString(String str) {
         System.out.println(str);
@@ -354,6 +349,11 @@ public class BeamAnalyses {
         printString("= = = = = = = = = = = = = = = = = = =");
     }
 
+    /**
+     * Whitney stress block beta calculator.
+     * @param fcPrime Concrete compressive strength.
+     * @return beta
+     */
     private double calculateBeta(double fcPrime) {
         double beta = 0.85;
 
@@ -367,5 +367,70 @@ public class BeamAnalyses {
         }
 
         return beta;
+    }
+
+    /**
+     * Concrete compression solid magnitude.
+     * @param fcPrime concrete compressive strength
+     * @param kd trial or value of height of compression block
+     * @param ⲉcu maximum concrete strain
+     * @param highestElev top elevation of beam section
+     * @return Cc
+     */
+    private double parabolicCompressionSolid(double fcPrime,
+                                             double kd,
+                                             double ⲉcu,
+                                             double highestElev)
+    {
+        List<BeamSectionNode> nodes = this.beamSection.getSection();
+        double y, ⲉcy, fc, yElev, b, Cc = 0;
+        int iterator = BeamContants.PARABOLIC_DY_ITERATION;
+        double dy = kd / iterator;          // Strip height
+        double[] compressionStripComponent;
+        for (int i = iterator; i > 0; i--) {
+            compressionStripComponent = beamCompressionComponent(i, dy, ⲉcu, kd, fcPrime, highestElev);
+            fc = compressionStripComponent[0];
+            b = compressionStripComponent[1];
+            Cc += fc * b * dy;
+        }
+        return Cc;
+    }
+
+    /**
+     * Beam compression solid strip.
+     * @param i ith strip for integration
+     * @param dy height of strip
+     * @param ⲉcu maximum concrete strain
+     * @param kd trial or value of height of compression block
+     * @param fcPrime concrete compressive strength
+     * @param highestElev top elevation of beam section
+     * @return Array consisting of b(y) and fc(y)
+     */
+    private double[] beamCompressionComponent(int i,
+                                              double dy,
+                                              double ⲉcu,
+                                              double kd,
+                                              double fcPrime,
+                                              double highestElev) {
+        double y = i * dy;
+        double ⲉcy = ⲉcu * y / kd;             // Strain at y
+        double fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉcu - Math.pow((ⲉcy / ⲉcu), 2));
+        double yElev = highestElev - kd + y;
+        double b = Calculators.getBaseAtY(yElev, this.beamSection.getSection());
+        double[] result = {fc, b};
+        return result;
+    }
+
+    /**
+     * Returns the appropriate value of fs to be used.
+     * @param fs Calculated fs
+     * @param fy Steel yield strength
+     * @return fs
+     */
+    private double calculateFs(double fs, double fy) {
+        if (fs > fy) {
+            return fy;
+        }
+        return fs;
     }
 }
