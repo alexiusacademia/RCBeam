@@ -161,8 +161,22 @@ public class BeamAnalyses {
         Cs = AsPrime * fsPrime;                                               // Compression force on steel
         Ts = As * fs;                                                         // Tensile force at steel
 
-        double yCompression = (Cc * ycc + Cs * dPrime) / (Cc + Cs);
+        double yCompression = (Cc * ycc + Cs * dPrime) / (Cc + Cs);             // Location of resultant of both Cc and Cs
+
         double Mcr = Ts * (d - yCompression) + Tc * (h - yCompression - yct);
+        printString("Mcr = " + Mcr / Math.pow(1000, 2));
+
+        // Calculate minimum steel using Whitney
+        double McrTrial = 0, a = 0.001, yA, yTop = 0;
+        while (McrTrial < Mcr) {
+            yA = highestElev - a;
+            compressionArea = Calculators.getAreaAboveAxis(yA, beamSectionNodes);
+            yTop = Calculators.getCentroidAboveAxis(yA, beamSectionNodes);
+            McrTrial = 0.85 * this.beamSection.getFcPrime() * compressionArea * (d - yTop);
+            a += 0.001;
+        }
+
+        this.minimumSteelTensionArea = Mcr / (fy * (d - yTop));
 
         double curvature = ⲉc / kd;
 

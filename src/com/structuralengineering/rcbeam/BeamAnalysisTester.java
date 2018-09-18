@@ -6,6 +6,7 @@ import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
 import com.structuralengineering.rcbeam.properties.SteelTension;
 import com.structuralengineering.rcbeam.properties.Unit;
+import com.structuralengineering.rcbeam.utils.Calculators;
 
 public class BeamAnalysisTester {
 
@@ -47,7 +48,7 @@ public class BeamAnalysisTester {
 
         BeamAnalyses analyses = new BeamAnalyses(bs);
         BeamAnalysisResult beforeCrack = analyses.beforeCrackAnalysis();
-        printString("kd(uncrack) = " + beforeCrack.getKd());
+        printString("AsMin = " + analyses.getMinimumSteelTensionArea());
     }
 
     private static void printString(String str) {
