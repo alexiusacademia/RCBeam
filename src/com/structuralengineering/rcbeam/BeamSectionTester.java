@@ -2,8 +2,6 @@ package com.structuralengineering.rcbeam;
 
 import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
-import com.structuralengineering.rcbeam.utils.Calculators;
-import com.structuralengineering.rcbeam.utils.Conversions;
 
 public class BeamSectionTester {
   public static void main(String[] args) {

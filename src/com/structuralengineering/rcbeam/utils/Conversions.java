@@ -97,4 +97,20 @@ public final class Conversions {
     public static double toSquareMillimeters(double area) {
         return area * Math.pow(25.4, 2);
     }
+
+    /**
+     * Returns moment in lbs-ft
+     * @param momentInMetric Value of moment in N-mm.
+     * @return Value of moment in lbs-ft.
+     */
+    public static double toEnglishMoment(double momentInMetric) {
+        double m = 0;
+
+        m = momentInMetric * 2.204;
+        m = m / 9.81;
+        m = m / 25.4;
+        m = m / 12;
+
+        return m;
+    }
 }
