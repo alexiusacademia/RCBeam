@@ -8,6 +8,7 @@ import java.util.List;
 public class Calculators {
     /**
      * Calculates  the area of a given sets of points/nodes.
+     *
      * @param nodes Points/vertices of the unclosed polygon.
      * @return Area of the polygon.
      */
@@ -15,9 +16,7 @@ public class Calculators {
         // Add the first node to the end of points.
         List<BeamSectionNode> newNodes = new ArrayList<>();
 
-        for (BeamSectionNode bsn : nodes) {
-            newNodes.add(bsn);
-        }
+        newNodes.addAll(nodes);
 
         newNodes.add(nodes.get(0));
         // Number of nodes.
@@ -29,7 +28,7 @@ public class Calculators {
         int j;
 
         // Shoelace formula.
-        for (int i = 0; i < n-1; i++) {
+        for (int i = 0; i < n - 1; i++) {
             j = (i + 1) % n;
             area += newNodes.get(i).getX() * newNodes.get(j).getY();
             area -= newNodes.get(j).getX() * newNodes.get(i).getY();
@@ -40,6 +39,7 @@ public class Calculators {
 
     /**
      * Centroid of polygon from the top
+     *
      * @param nodes Polygon definition
      * @return centroid
      */
@@ -48,9 +48,7 @@ public class Calculators {
 
         List<BeamSectionNode> newNodes = new ArrayList<>();
 
-        for (BeamSectionNode bsn : nodes) {
-            newNodes.add(bsn);
-        }
+        newNodes.addAll(nodes);
 
         // Add the first node to the end of points.
         newNodes.add(nodes.get(0));
@@ -60,9 +58,9 @@ public class Calculators {
 
         double area = calculateArea(nodes);
 
-        for (int i = 0; i < (n-1); i++) {
+        for (int i = 0; i < (n - 1); i++) {
             kd += (newNodes.get(i).getY() + newNodes.get(i + 1).getY()) *
-                    (newNodes.get(i).getX() * newNodes.get(i+1).getY() - newNodes.get(i+1).getX() * newNodes.get(i).getY());
+                    (newNodes.get(i).getX() * newNodes.get(i + 1).getY() - newNodes.get(i + 1).getX() * newNodes.get(i).getY());
         }
 
         kd = Math.abs(kd / (6 * area));
@@ -73,6 +71,7 @@ public class Calculators {
 
     /**
      * Get the lowest point(y) in a set of vertices.
+     *
      * @param nodes Set of vertices.
      * @return Lowest y.
      */
@@ -90,6 +89,7 @@ public class Calculators {
 
     /**
      * Get the highest point(y) in a set of vertices.
+     *
      * @param nodes Set of vertices.
      * @return Highest y.
      */
@@ -118,9 +118,9 @@ public class Calculators {
 
         // Iterate to each node to look for intersection
         for (int i = 1; i < nodes.size(); i++) {
-            y1 = nodes.get(i-1).getY();
+            y1 = nodes.get(i - 1).getY();
             y3 = nodes.get(i).getY();
-            x1 = nodes.get(i-1).getX();
+            x1 = nodes.get(i - 1).getX();
             x3 = nodes.get(i).getX();
             x2 = (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
 
@@ -154,9 +154,9 @@ public class Calculators {
 
         // Iterate to each node to look for intersection
         for (int i = 1; i < nodes.size(); i++) {
-            y1 = nodes.get(i-1).getY();
+            y1 = nodes.get(i - 1).getY();
             y3 = nodes.get(i).getY();
-            x1 = nodes.get(i-1).getX();
+            x1 = nodes.get(i - 1).getX();
             x3 = nodes.get(i).getX();
             x2 = interpolate(x1, x3, y1, y2, y3);
 
@@ -187,6 +187,7 @@ public class Calculators {
 
     /**
      * Calculate beam width at y from neutral axis
+     *
      * @param yElev Elevation of point of interest
      * @param nodes Beam nodes
      * @return Width
@@ -205,9 +206,9 @@ public class Calculators {
         // Iterate to each node to look for intersection
         for (int i = 1; i < nodes.size(); i++) {
             if (intersected < 2) {
-                y1 = nodes.get(i-1).getY();
+                y1 = nodes.get(i - 1).getY();
                 y3 = nodes.get(i).getY();
-                x1 = nodes.get(i-1).getX();
+                x1 = nodes.get(i - 1).getX();
                 x3 = nodes.get(i).getX();
                 x2 = interpolate(x1, x3, y1, y2, y3);
                 if (y1 <= yElev && y3 > yElev) {
@@ -232,7 +233,7 @@ public class Calculators {
     }
 
     private static double interpolate(double x1, double x3, double y1,
-                               double y2, double y3) {
+                                      double y2, double y3) {
         return (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
     }
 }

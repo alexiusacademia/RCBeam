@@ -55,7 +55,7 @@ public final class Conversions {
      * Converts the linear dimension
      *
      * @param distance dimension
-     * @param u unit
+     * @param u        unit
      * @return linearConverted dimension in metric
      */
     public static double linearConverted(double distance, Unit u) {
@@ -68,8 +68,9 @@ public final class Conversions {
 
     /**
      * Converts pressure
+     *
      * @param pressure pressure
-     * @param u unit
+     * @param u        unit
      * @return converted oressure in MPa
      */
     public static double pressureConverted(double pressure, Unit u) {
@@ -82,6 +83,7 @@ public final class Conversions {
 
     /**
      * Converts square millimeters to square inches
+     *
      * @param area Area in square millimeters
      * @return area in square inches
      */
@@ -91,6 +93,7 @@ public final class Conversions {
 
     /**
      * Converts square inches to square millimeters
+     *
      * @param area Area in square inches.
      * @return Area in square millimeters.
      */
@@ -100,11 +103,12 @@ public final class Conversions {
 
     /**
      * Returns moment in lbs-ft
+     *
      * @param momentInMetric Value of moment in N-mm.
      * @return Value of moment in lbs-ft.
      */
     public static double toEnglishMoment(double momentInMetric) {
-        double m = 0;
+        double m;
 
         m = momentInMetric * 2.204;
         m = m / 9.81;

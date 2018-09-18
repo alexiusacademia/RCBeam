@@ -1,37 +1,41 @@
 package com.structuralengineering.rcbeam.analysis;
 
 public class BeamAnalysisResult {
-  private double momentC;
-  private double curvatureC;
-  private double kd;
+    private double momentC;
+    private double curvatureC;
+    private double kd;
 
-  /** *******************************************
-   * Getters
-   ******************************************* */
-  public double getMomentC() {
-    return momentC;
-  }
+    /**
+     * ******************************************
+     * Getters
+     * ******************************************
+     */
+    public double getMomentC() {
+        return momentC;
+    }
 
-  public double getCurvatureC() {
-    return curvatureC;
-  }
+    /**
+     * ******************************************
+     * Setters
+     * ******************************************
+     */
+    public void setMomentC(double momentC) {
+        this.momentC = momentC;
+    }
 
-  public double getKd() {
-    return kd;
-  }
+    public double getCurvatureC() {
+        return curvatureC;
+    }
 
-  /** *******************************************
-   * Setters
-   ******************************************* */
-  public void setMomentC(double momentC) {
-    this.momentC = momentC;
-  }
+    public void setCurvatureC(double curvatureC) {
+        this.curvatureC = curvatureC;
+    }
 
-  public void setCurvatureC(double curvatureC) {
-    this.curvatureC = curvatureC;
-  }
+    public double getKd() {
+        return kd;
+    }
 
-  public void setKd(double kd) {
-    this.kd = kd;
-  }
+    public void setKd(double kd) {
+        this.kd = kd;
+    }
 }
