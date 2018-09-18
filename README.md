@@ -3,15 +3,15 @@
 A java library for the analysis of reinforced concrete beams of any section.
 
 ### Section Features
-- Non-Hollow Sections (for now)
-- Any shape (provided with `x,y` coordinates)
-- Default unit is millimeter (for now)
+- Non-Hollow Sections
+- Any shape (provided with `x,y` coordinates) except rounded
+- Default unit is metric
 
 ### Analysis Results
-*(At specific stages.)*
 
 - Moment
 - Curvature
+- Height of compression block
 
 ### Creating Steel in Tension Object
 
@@ -20,7 +20,7 @@ A java library for the analysis of reinforced concrete beams of any section.
 SteelTension st = new SteelTension();
 
 // Asigning the steel area, 2nd parameter is true if in metric units (in square millimeters)
-st.setTotalArea(1200, true);
+st.setTotalArea(1200, Unit.METRIC);
 ```
 
 ### Creating Steel in Compression Object
@@ -30,10 +30,10 @@ st.setTotalArea(1200, true);
 SteelCompression sc = new SteelCompression();
 
 // Asigning the steel area, 2nd parameter is true if in metric units (square millimeters)
-sc.setTotalArea(1200, true);
+sc.setTotalArea(1200, Unit.METRIC);
 
 // Set the location of compression steel reinf. from extrem concrete compression fiber (in millimeters)
-sc.setdPrime(50);
+sc.setdPrime(50, Unit.METRIC);
 ```
 
 ### Creating BeamSection Object
@@ -47,6 +47,9 @@ bs.addNode(new BeamSectionNode(0, 0));
 bs.addNode(new BeamSectionNode(0, 500));
 bs.addNode(new BeamSectionNode(300, 500));
 bs.addNode(new BeamSectionNode(300, 0));
+
+// Define unit
+bs.setUnit(Unit.METRIC);
 
 // Define properties
 bs.setFcPrime(21);
@@ -74,6 +77,18 @@ System.out.println(uncrackAnalysis.getMomentC());
 System.out.println(uncrackAnalysis.getCurvatureC());
 // Minimum tensile reinforcement as required by ACI code
 System.out.println(uncrackAnalysis.getMinimumSteelTensionArea());
+```
+
+### Balanced Design Analysis 
+```java
+analyses.balancedAnalysis(StressDistribution.WHITNEY);
+double Asb = analyses.getBalancedSteelTension();
+```
+
+### Nominal Moment Capacity
+```java
+BeamAnalysisResult limitAnalysis = analyses.beamCapacityAnalysis(StressDistribution.WHITNEY);
+double Mn = limitAnalysis.getMomentC();
 ```
 
 
