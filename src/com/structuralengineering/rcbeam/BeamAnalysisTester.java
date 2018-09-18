@@ -3,10 +3,7 @@ package com.structuralengineering.rcbeam;
 import com.structuralengineering.rcbeam.analysis.BeamAnalyses;
 import com.structuralengineering.rcbeam.analysis.BeamAnalysisResult;
 import com.structuralengineering.rcbeam.analysis.StressDistribution;
-import com.structuralengineering.rcbeam.properties.BeamSection;
-import com.structuralengineering.rcbeam.properties.BeamSectionNode;
-import com.structuralengineering.rcbeam.properties.SteelTension;
-import com.structuralengineering.rcbeam.properties.Unit;
+import com.structuralengineering.rcbeam.properties.*;
 
 public class BeamAnalysisTester {
 
