@@ -2,8 +2,10 @@ package com.structuralengineering.rcbeam;
 
 import com.structuralengineering.rcbeam.analysis.BeamAnalyses;
 import com.structuralengineering.rcbeam.analysis.BeamAnalysisResult;
-import com.structuralengineering.rcbeam.analysis.StressDistribution;
-import com.structuralengineering.rcbeam.properties.*;
+import com.structuralengineering.rcbeam.properties.BeamSection;
+import com.structuralengineering.rcbeam.properties.BeamSectionNode;
+import com.structuralengineering.rcbeam.properties.SteelTension;
+import com.structuralengineering.rcbeam.properties.Unit;
 
 public class BeamAnalysisTester {
 
@@ -15,8 +17,8 @@ public class BeamAnalysisTester {
         bs.addNode(new BeamSectionNode(300,450));
         bs.addNode(new BeamSectionNode(300,0));*/
         // Triangular
-        bs.addNode(new BeamSectionNode(0,0));
-        bs.addNode(new BeamSectionNode(150,600));
+        bs.addNode(new BeamSectionNode(0, 0));
+        bs.addNode(new BeamSectionNode(150, 600));
         bs.addNode(new BeamSectionNode(300, 0));
         // T-Beam
         /*bs.addNode(new BeamSectionNode(0, 0));
@@ -38,21 +40,14 @@ public class BeamAnalysisTester {
         bs.setFy(300);
 
         SteelTension st = new SteelTension();
-      
+
         st.setTotalArea(0, Unit.METRIC);
 
         bs.setSteelTension(st);
 
         BeamAnalyses analyses = new BeamAnalyses(bs);
-
-        analyses.balancedAnalysis(StressDistribution.WHITNEY);
-        printString("Asb = " + analyses.getBalacedSteelTension());
-
-        BeamAnalysisResult limitState = analyses.beamCapacityAnalysis(StressDistribution.WHITNEY);
-        printString("Mn = " + limitState.getMomentC() / Math.pow(1000, 2));
-
-        analyses.beforeCrackAnalysis();
-        printString("Asmin = " + analyses.getMinimumSteelTensionArea());
+        BeamAnalysisResult beforeCrack = analyses.beforeCrackAnalysis();
+        printString("kd(uncrack) = " + beforeCrack.getKd());
     }
 
     private static void printString(String str) {

@@ -17,7 +17,7 @@ public class BeamSection {
     private SteelTension steelTension;                  // Tension steel property
     private SteelCompression steelCompression;          // Compression steel property
     private double effectiveDepth;                      // Depth of tension steel from concrete
-                                                        // extreme compression fiber in mm. (d)
+    // extreme compression fiber in mm. (d)
     private double Ec;                                  // Concrete secant modulus in MPa. (Ec)
     private double Es;                                  // Modulus of elasticity of steel in MPa. (Es)
     private double modularRatio;                        // Modular ratio of steel to concrete. (n)
@@ -63,6 +63,7 @@ public class BeamSection {
 
     /**
      * Constructor that sets the unit for analysis.
+     *
      * @param u Unit
      */
     public BeamSection(Unit u) {
@@ -77,6 +78,7 @@ public class BeamSection {
 
     /**
      * Returns all the section nodes as ArrayList.
+     *
      * @return section
      */
     public List<BeamSectionNode> getSection() {
@@ -85,6 +87,7 @@ public class BeamSection {
 
     /**
      * Gets the effective depth of beam.
+     *
      * @return effectiveDepth (d)
      */
     public double getEffectiveDepth() {
@@ -92,7 +95,20 @@ public class BeamSection {
     }
 
     /**
+     * Sets the effective depth of the beam.
+     *
+     * @param effectiveDepth effective depth
+     */
+    public void setEffectiveDepth(double effectiveDepth) {
+        this.effectiveDepth = effectiveDepth;
+        if (this.unit == Unit.ENGLISH) {
+            this.effectiveDepth = Conversions.inTomm(effectiveDepth);
+        }
+    }
+
+    /**
      * Gets the concrete secant modulus.
+     *
      * @return Ec.
      */
     public double getEc() {
@@ -101,6 +117,7 @@ public class BeamSection {
 
     /**
      * Gets the modulus of elasticity of steel.
+     *
      * @return Es in MPa.
      */
     public double getEs() {
@@ -109,6 +126,7 @@ public class BeamSection {
 
     /**
      * Gets the modular ratio.
+     *
      * @return modularRatio
      */
     public double getModularRatio() {
@@ -116,7 +134,17 @@ public class BeamSection {
     }
 
     /**
+     * Sets the modular ratio.
+     *
+     * @param modularRatio n
+     */
+    public void setModularRatio(double modularRatio) {
+        this.modularRatio = modularRatio;
+    }
+
+    /**
      * Gets the modulus of rupture.
+     *
      * @return fr
      */
     public double getFr() {
@@ -125,10 +153,20 @@ public class BeamSection {
 
     /**
      * Gets the steel tension object.
+     *
      * @return steelTension
      */
     public SteelTension getSteelTension() {
         return steelTension;
+    }
+
+    /**
+     * Sets SteelTension object.
+     *
+     * @param steelTension SteelTension object
+     */
+    public void setSteelTension(SteelTension steelTension) {
+        this.steelTension = steelTension;
     }
 
     public SteelCompression getSteelCompression() {
@@ -136,35 +174,12 @@ public class BeamSection {
     }
 
     /**
-     * Gets the concrete compressive strength.
-     * @return fc'
+     * Sets the SteelCompression object
+     *
+     * @param steelCompression SteelCompression object
      */
-    public double getFcPrime() {
-        return Conversions.pressureConverted(this.fcPrime, this.unit);
-    }
-
-    /**
-     * Get ⲉo
-     * @return ⲉo
-     */
-    public double getConcreteStrainIndex() {
-        return concreteStrainIndex;
-    }
-
-    /**
-     * Get the steel tebsile strength
-     * @return fy
-     */
-    public double getFy() {
-        return Conversions.pressureConverted(this.fy, this.unit);
-    }
-
-    /**
-     * Returns the unit
-     * @return unit
-     */
-    public Unit getUnit() {
-        return unit;
+    public void setSteelCompression(SteelCompression steelCompression) {
+        this.steelCompression = steelCompression;
     }
 
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -174,18 +189,17 @@ public class BeamSection {
     // = = = = = = = = = = = = = = = = = = = = = =
 
     /**
-     * Sets the fy.
-     * @param fy Steel yield strength.
+     * Gets the concrete compressive strength.
+     *
+     * @return fc'
      */
-    public void setFy(double fy) {
-        this.fy = fy;
-        if (this.unit == Unit.ENGLISH) {
-            this.fy = Conversions.PSItoMPa(fy);
-        }
+    public double getFcPrime() {
+        return Conversions.pressureConverted(this.fcPrime, this.unit);
     }
 
     /**
      * Sets the fc'
+     *
      * @param fcPrime Concrete compressive strength
      */
     public void setFcPrime(double fcPrime) {
@@ -200,42 +214,47 @@ public class BeamSection {
     }
 
     /**
-     * Sets the effective depth of the beam.
-     * @param effectiveDepth effective depth
+     * Get ⲉo
+     *
+     * @return ⲉo
      */
-    public void setEffectiveDepth(double effectiveDepth) {
-        this.effectiveDepth = effectiveDepth;
+    public double getConcreteStrainIndex() {
+        return concreteStrainIndex;
+    }
+
+    /**
+     * Get the steel tebsile strength
+     *
+     * @return fy
+     */
+    public double getFy() {
+        return Conversions.pressureConverted(this.fy, this.unit);
+    }
+
+    /**
+     * Sets the fy.
+     *
+     * @param fy Steel yield strength.
+     */
+    public void setFy(double fy) {
+        this.fy = fy;
         if (this.unit == Unit.ENGLISH) {
-            this.effectiveDepth = Conversions.inTomm(effectiveDepth);
+            this.fy = Conversions.PSItoMPa(fy);
         }
     }
 
     /**
-     * Sets the modular ratio.
-     * @param modularRatio n
+     * Returns the unit
+     *
+     * @return unit
      */
-    public void setModularRatio(double modularRatio) {
-        this.modularRatio = modularRatio;
-    }
-
-    /**
-     * Sets SteelTension object.
-     * @param steelTension SteelTension object
-     */
-    public void setSteelTension(SteelTension steelTension) {
-        this.steelTension = steelTension;
-    }
-
-    /**
-     * Sets the SteelCompression object
-     * @param steelCompression SteelCompression object
-     */
-    public void setSteelCompression(SteelCompression steelCompression) {
-        this.steelCompression = steelCompression;
+    public Unit getUnit() {
+        return unit;
     }
 
     /**
      * Sets the unit
+     *
      * @param unit Unit
      */
     public void setUnit(Unit unit) {
@@ -251,6 +270,7 @@ public class BeamSection {
     /**
      * Add a single node to the beam section. Addition of nodes
      * must follow a clockwise notation.
+     *
      * @param node BeamSectionNode to be added.
      */
     public void addNode(BeamSectionNode node) {
@@ -259,6 +279,7 @@ public class BeamSection {
 
     /**
      * Remove a node at a specified index.
+     *
      * @param index The index in which the item is to be removed from.
      */
     public void removeNode(int index) {

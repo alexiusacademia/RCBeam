@@ -59,8 +59,9 @@ public class SteelTension {
 
     /**
      * Sets the total area of steel in specified unit.
+     *
      * @param totalArea Area of steel.
-     * @param u  Unit
+     * @param u         Unit
      */
     public void setTotalArea(double totalArea, Unit u) {
         if (u == Unit.ENGLISH) {
@@ -72,8 +73,9 @@ public class SteelTension {
 
     /**
      * Sets the stress (fs) in the unit specified.
-     * @param fs       steel stress
-     * @param u Unit
+     *
+     * @param fs steel stress
+     * @param u  Unit
      */
     public void setFs(double fs, Unit u) {
         if (u == Unit.ENGLISH) {
