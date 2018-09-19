@@ -2,6 +2,7 @@ package com.structuralengineering.rcbeam;
 
 import com.structuralengineering.rcbeam.analysis.BeamAnalyses;
 import com.structuralengineering.rcbeam.analysis.BeamAnalysisResult;
+import com.structuralengineering.rcbeam.analysis.StressDistribution;
 import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.BeamSectionNode;
 import com.structuralengineering.rcbeam.properties.SteelTension;
@@ -42,13 +43,16 @@ public class BeamAnalysisTester {
 
         SteelTension st = new SteelTension();
 
-        st.setTotalArea(0, Unit.METRIC);
+        st.setTotalArea(1000, Unit.METRIC);
 
         bs.setSteelTension(st);
 
         BeamAnalyses analyses = new BeamAnalyses(bs);
-        BeamAnalysisResult beforeCrack = analyses.beforeCrackAnalysis();
-        printString("AsMin = " + analyses.getMinimumSteelTensionArea());
+        BeamAnalysisResult nominalParabolic = analyses.beamCapacityAnalysis(StressDistribution.PARABOLIC);
+        printString("Mn(parabolic) = " + nominalParabolic.getMomentC() / Math.pow(1000, 2));
+
+        BeamAnalysisResult nominalWhitney = analyses.beamCapacityAnalysis(StressDistribution.WHITNEY);
+        printString("Mn(Whitney) = " + nominalWhitney.getMomentC() / Math.pow(1000, 2));
     }
 
     private static void printString(String str) {
