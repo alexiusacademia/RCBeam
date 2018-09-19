@@ -240,7 +240,7 @@ public class BeamAnalyses {
                 Cs += AsPrime * fsPrime;
 
                 AsCalc = (Cc + Cs) / fs;
-                kd += 0.001;
+                kd += 0.1;
             }
 
             double My = 0;
@@ -467,10 +467,16 @@ public class BeamAnalyses {
                                                    double kd,
                                                    double fcPrime,
                                                    double highestElev) {
+        double ⲉco = 2 * 0.85 * fcPrime / (4700 * Math.sqrt(fcPrime));
         double[] result = new double[2];
         double y = i * dy;
         double ⲉcy = ⲉcu * y / kd;             // Strain at y
-        double fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉcu - Math.pow((ⲉcy / ⲉcu), 2));
+        double fc;
+        if (ⲉcy < ⲉco) {
+            fc = 0.85 * fcPrime * (2 * ⲉcy / ⲉco - Math.pow((ⲉcy / ⲉco), 2));
+        }else {
+            fc = 0.85 * fcPrime;
+        }
         double yElev = highestElev - kd + y;
         double b = Calculators.getBaseAtY(yElev, this.beamSection.getSection());
         result[0] = fc;
