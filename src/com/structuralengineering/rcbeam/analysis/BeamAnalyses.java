@@ -164,7 +164,6 @@ public class BeamAnalyses {
         double yCompression = (Cc * ycc + Cs * dPrime) / (Cc + Cs);             // Location of resultant of both Cc and Cs
 
         double Mcr = Ts * (d - yCompression) + Tc * (h - yCompression - yct);
-        printString("Mcr = " + Mcr / Math.pow(1000, 2));
 
         // Calculate minimum steel using Whitney
         double McrTrial = 0, a = 0.001, yA, yTop = 0;
