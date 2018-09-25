@@ -53,6 +53,10 @@ public class BeamAnalysisTester {
 
         BeamAnalysisResult nominalWhitney = analyses.beamCapacityAnalysis(StressDistribution.WHITNEY);
         printString("Mn(Whitney) = " + nominalWhitney.getMomentC() / Math.pow(1000, 2));
+
+        BeamAnalysisResult uncrack = analyses.beforeCrackAnalysis();
+        printString("Mcr = " + analyses.getCrackingMoment());
+        printString("Asmin = " + analyses.getMinimumSteelTensionArea());
     }
 
     private static void printString(String str) {
