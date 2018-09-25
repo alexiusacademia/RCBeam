@@ -224,12 +224,12 @@ public class Calculators {
             }
         }
 
-        double width = 0;
+        double base = 0;
         if (newNodes.size() == 2) {
-            width = Math.abs(newNodes.get(0).getX() - newNodes.get(1).getX());
+            base = Math.abs(newNodes.get(0).getX() - newNodes.get(1).getX());
         }
 
-        return width;
+        return base;
     }
 
     private static double interpolate(double x1, double x3, double y1,
