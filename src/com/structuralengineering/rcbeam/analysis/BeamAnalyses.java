@@ -8,7 +8,7 @@ import com.structuralengineering.rcbeam.utils.Conversions;
 import java.util.List;
 
 /**
- * Class for the various reinforced concrete beam analysis
+ * Class for the various reinforced concrete beam analyses
  */
 public class BeamAnalyses {
     // = = = = = = = = = = = = = = = = = = = = = =
@@ -26,7 +26,6 @@ public class BeamAnalyses {
 
     /**
      * Constructor that provides the beam section to be analyzed
-     *
      * @param bSection BeamSection
      */
     public BeamAnalyses(BeamSection bSection) {
@@ -378,10 +377,32 @@ public class BeamAnalyses {
             Cs = AsPrime * fsPrime;
         }
         Asb = (Cc + Cs) / fy;
+
+        // Get the location of resultant concrete compression
+        int iterator = BeamContants.COMPRESSION_SOLID_DY_ITERATION;
+        double yBar;                                                    // Centroid of compression solid from top
+        double[] compressionStripComponent;
+        double dy = kd / iterator;                                             // Reset dy
+        double My = 0;
+        double fc1, b1;
+        for (int i = iterator; i > 0; i--) {
+            compressionStripComponent = beamCompressionStripParabolic(i, dy, ⲉcu, kd, fcPrime, highestElev);
+            fc1 = compressionStripComponent[0];
+            b1 = compressionStripComponent[1];
+            Cc = fc1 * b1 * dy;
+
+            My += Cc * (kd - i * dy);
+        }
+        yBar = My / Cc;
+
+        double momentBalance = Cc * (d - yBar) + Cs * (d - dPrime);
+
         this.balacedSteelTension = Asb;
 
         result.setCurvatureC(ⲉcu / kd);
         result.setKd(kd);
+        result.setMomentC(momentBalance);
+
         return result;
     }
 
