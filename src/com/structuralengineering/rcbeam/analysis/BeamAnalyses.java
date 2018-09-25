@@ -225,7 +225,13 @@ public class BeamAnalyses {
             int iterator = BeamContants.COMPRESSION_SOLID_DY_ITERATION;                                            // Divide kd by this number
             double b;                                                    // Distance from neutral axis and corresponding beam width
             double dy;                                                      // Strip for integration
-            while (AsCalc < As) {
+            double kdIterator;
+            if (this.beamSection.getUnit() == Unit.ENGLISH) {
+                kdIterator = 1 / 25.4;
+            } else {
+                kdIterator = 1;
+            }
+            while (Math.abs(AsCalc - As) > 0.01 * As) {// AsCalc < As) {
                 Cs = 0;
                 Cc = compressionSolidVolumeParabolic(fcPrime,
                         kd,
@@ -240,7 +246,29 @@ public class BeamAnalyses {
                 Cs += AsPrime * fsPrime;
 
                 AsCalc = (Cc + Cs) / fs;
-                kd += 0.1;
+
+                if (AsCalc > As) {
+                    while (AsCalc > As) {
+                        kd -= kdIterator;
+                        Cc = compressionSolidVolumeParabolic(fcPrime,
+                                kd,
+                                ⲉcu,
+                                highestElev);
+                        fs = ⲉcu * Es * (d - kd) / kd;
+                        fs = calculateFs(fs, fy);
+                        fsPrime = fs * (kd - dPrime) / (d - kd);
+                        fsPrime = calculateFs(fsPrime, fy);
+
+                        Cs += AsPrime * fsPrime;
+
+                        AsCalc = (Cc + Cs) / fs;
+                        kdIterator *= 0.5;
+                    }
+                } else {
+                    kdIterator *= 1.5;
+                }
+
+                kd += kdIterator;
             }
 
             double My = 0;
