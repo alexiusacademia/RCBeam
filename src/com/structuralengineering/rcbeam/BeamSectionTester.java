@@ -4,6 +4,8 @@ import com.structuralengineering.rcbeam.properties.BeamSection;
 import com.structuralengineering.rcbeam.properties.Node;
 import com.structuralengineering.rcbeam.utils.Calculators;
 
+import java.util.List;
+
 public class BeamSectionTester {
     public static void main(String[] args) {
         BeamSection bs = new BeamSection();
@@ -19,9 +21,10 @@ public class BeamSectionTester {
         bs.addNode(new Node(2,8));
         bs.addNode(new Node(2,2));
 
-        Double str = Calculators.getBaseAtY(5, bs.getSection());
-
-        printString(String.valueOf(str));
+        List<Node> nodes = Calculators.getNewNodes(5, bs.getSection());
+        for (Node n : nodes) {
+            printString("[" + n.getX() + ", " + n.getY() + "]");
+        }
     }
 
     private static void printString(String str) {

@@ -185,6 +185,31 @@ public class Calculators {
         return calculateArea(newNodes);
     }
 
+    public static List<Node> getNewNodes(double yElev, List<Node> nodes) {
+        nodes.add(nodes.get(0));
+        List<Node> newNodes = new ArrayList<>();
+
+        newNodes.add(nodes.get(0));
+
+        for (int i = 1; i < nodes.size(); i++) {
+            newNodes.add(nodes.get(i));
+            if (hasIntersected(yElev, nodes.get(i - 1), nodes.get(i))) {
+                // Get the intersection point
+                Node n = getIntersection(yElev, nodes.get(i - 1), nodes.get(i));
+                newNodes.add(i + 1, n);
+            }
+        }
+
+        // Now remove every node that is below the axis
+        for (int i = 0; i < newNodes.size(); i++) {
+            if (newNodes.get(i).getY() < yElev) {
+                newNodes.remove(newNodes.get(i));
+            }
+        }
+
+        return newNodes;
+    }
+
     public static double getBaseAtY(double yElev, List<Node> nodes) {
         List<Node> newNodes = nodes;
         newNodes.add(nodes.get(0));
