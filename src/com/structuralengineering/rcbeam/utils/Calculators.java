@@ -1,6 +1,6 @@
 package com.structuralengineering.rcbeam.utils;
 
-import com.structuralengineering.rcbeam.properties.BeamSectionNode;
+import com.structuralengineering.rcbeam.properties.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +12,9 @@ public class Calculators {
      * @param nodes Points/vertices of the unclosed polygon.
      * @return Area of the polygon.
      */
-    public static double calculateArea(List<BeamSectionNode> nodes) {
+    public static double calculateArea(List<Node> nodes) {
         // Add the first node to the end of points.
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         newNodes.addAll(nodes);
 
@@ -43,10 +43,10 @@ public class Calculators {
      * @param nodes Polygon definition
      * @return centroid
      */
-    public static double calculateCentroidY(List<BeamSectionNode> nodes) {
+    public static double calculateCentroidY(List<Node> nodes) {
         double kd = 0;
 
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         newNodes.addAll(nodes);
 
@@ -75,10 +75,10 @@ public class Calculators {
      * @param nodes Set of vertices.
      * @return Lowest y.
      */
-    public static double lowestY(List<BeamSectionNode> nodes) {
+    public static double lowestY(List<Node> nodes) {
         double lowest = nodes.get(0).getY();
 
-        for (BeamSectionNode node : nodes) {
+        for (Node node : nodes) {
             if (node.getY() < lowest) {
                 lowest = node.getY();
             }
@@ -93,10 +93,10 @@ public class Calculators {
      * @param nodes Set of vertices.
      * @return Highest y.
      */
-    public static double highestY(List<BeamSectionNode> nodes) {
+    public static double highestY(List<Node> nodes) {
         double highest = nodes.get(0).getY();
 
-        for (BeamSectionNode node : nodes) {
+        for (Node node : nodes) {
             if (node.getY() > highest) {
                 highest = node.getY();
             }
@@ -105,9 +105,9 @@ public class Calculators {
         return highest;
     }
 
-    public static double getCentroidAboveAxis(double axisElevation, List<BeamSectionNode> nodes) {
+    public static double getCentroidAboveAxis(double axisElevation, List<Node> nodes) {
         // Hold the new nodes
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         int intersected = 0;
         boolean isAbove = false;
@@ -128,7 +128,7 @@ public class Calculators {
                 if ((y1 <= axisElevation && y3 > axisElevation) ||
                         (y1 >= axisElevation && y3 < axisElevation)) {
                     // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
+                    newNodes.add(new Node(x2, y2));
                     intersected++;
                 }
             }
@@ -141,9 +141,9 @@ public class Calculators {
         return calculateCentroidY(newNodes);
     }
 
-    public static double getAreaAboveAxis(double axisElevation, List<BeamSectionNode> nodes) {
+    public static double getAreaAboveAxis(double axisElevation, List<Node> nodes) {
         // Hold the new nodes
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         int intersected = 0;
         boolean isAbove = false;
@@ -165,7 +165,7 @@ public class Calculators {
                 if ((y1 <= axisElevation && y3 > axisElevation) ||
                         (y1 >= axisElevation && y3 < axisElevation)) {
                     // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
+                    newNodes.add(new Node(x2, y2));
                     intersected++;
                 }
             }
@@ -185,6 +185,24 @@ public class Calculators {
         return calculateArea(newNodes);
     }
 
+    public static double getBaseAtYTest(double yElev, List<Node> node) {
+        List<Node> newNodes = new ArrayList<>();
+
+        double base = 0;
+
+        for (int i = 1; i <= node.size(); i++) {
+
+        }
+
+        return base;
+    }
+
+    public static Node getIntersection(float slope1, float intercept1, float slope2, float intercept2) {
+        Node node = new Node();
+
+        return node;
+    }
+
     /**
      * Calculate beam width at y from neutral axis
      *
@@ -192,9 +210,9 @@ public class Calculators {
      * @param nodes Beam nodes
      * @return Width
      */
-    public static double getBaseAtY(double yElev, List<BeamSectionNode> nodes) {
+    public static double getBaseAtY(double yElev, List<Node> nodes) {
         // Hold the new nodes
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         int intersected = 0;
         boolean isAbove = false;
@@ -213,12 +231,12 @@ public class Calculators {
                 x2 = interpolate(x1, x3, y1, y2, y3);
                 if (y1 <= yElev && y3 > yElev) {
                     // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
+                    newNodes.add(new Node(x2, y2));
                     intersected++;
                 }
                 if (y1 >= yElev && y3 < yElev) {
                     // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
+                    newNodes.add(new Node(x2, y2));
                     intersected++;
                 }
             }
