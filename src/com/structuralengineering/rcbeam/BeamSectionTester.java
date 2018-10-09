@@ -19,10 +19,9 @@ public class BeamSectionTester {
         bs.addNode(new Node(2,8));
         bs.addNode(new Node(2,2));
 
-        double area = Calculators.calculateArea(bs.getSection());
+        Double str = Calculators.getBaseAtY(5, bs.getSection());
 
-        printString("Area = " + area);
-        printString("kd = " + Calculators.calculateCentroidY(bs.getSection()));
+        printString(String.valueOf(str));
     }
 
     private static void printString(String str) {

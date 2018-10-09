@@ -185,73 +185,98 @@ public class Calculators {
         return calculateArea(newNodes);
     }
 
-    public static double getBaseAtYTest(double yElev, List<Node> node) {
-        List<Node> newNodes = new ArrayList<>();
+    public static double getBaseAtY(double yElev, List<Node> nodes) {
+        List<Node> newNodes = nodes;
+        newNodes.add(nodes.get(0));
+
+        List<Node> intersectionNodes = new ArrayList<>();
 
         double base = 0;
 
-        for (int i = 1; i <= node.size(); i++) {
-
-        }
-
-        return base;
-    }
-
-    public static Node getIntersection(float slope1, float intercept1, float slope2, float intercept2) {
-        Node node = new Node();
-
-        return node;
-    }
-
-    /**
-     * Calculate beam width at y from neutral axis
-     *
-     * @param yElev Elevation of point of interest
-     * @param nodes Beam nodes
-     * @return Width
-     */
-    public static double getBaseAtY(double yElev, List<Node> nodes) {
-        // Hold the new nodes
-        List<Node> newNodes = new ArrayList<>();
-
-        int intersected = 0;
-        boolean isAbove = false;
-
-        double x1, x2, x3;
-        double y1, y2, y3;
-        y2 = yElev;
-
-        // Iterate to each node to look for intersection
-        for (int i = 1; i < nodes.size(); i++) {
-            if (intersected < 2) {
-                y1 = nodes.get(i - 1).getY();
-                y3 = nodes.get(i).getY();
-                x1 = nodes.get(i - 1).getX();
-                x3 = nodes.get(i).getX();
-                x2 = interpolate(x1, x3, y1, y2, y3);
-                if (y1 <= yElev && y3 > yElev) {
-                    // We got intersection
-                    newNodes.add(new Node(x2, y2));
-                    intersected++;
-                }
-                if (y1 >= yElev && y3 < yElev) {
-                    // We got intersection
-                    newNodes.add(new Node(x2, y2));
-                    intersected++;
-                }
+        for (int i = 1; i < newNodes.size(); i++) {
+            // Check intersection
+            if (hasIntersected(yElev, newNodes.get(i-1), newNodes.get(i))) {
+                intersectionNodes.add(getIntersection(yElev, newNodes.get(i - 1), newNodes.get(i)));
             }
         }
 
-        double base = 0;
-        if (newNodes.size() == 2) {
-            base = Math.abs(newNodes.get(0).getX() - newNodes.get(1).getX());
+        // Rearrange nodes based on abscissa
+        List<Node> rearrangedNodes = sortNodesByAbscissa(intersectionNodes);
+
+        for (int i = 0; i < rearrangedNodes.size() - 1; i += 2) {
+            base += rearrangedNodes.get(i).getX() - rearrangedNodes.get(i + 1).getX();
         }
 
-        return base;
+        return Math.abs(base);
+    }
+
+    public static Node getIntersection(double elevation, Node node1, Node node2) {
+        double y1, y2, y3, x1, x2, x3;
+        y1 = node1.getY();
+        y2 = elevation;
+        y3 = node2.getY();
+        x1 = node1.getX();
+        x3 = node2.getX();
+        /*
+        x2 - x1     y2 - y1
+        ------- =  ---------
+        x3 - x1     y3 - y1
+         */
+        x2 = (y2 - y1) / (y3 - y1) * (x3 - x1) + x1;
+
+        return new Node(x2, y2);
+    }
+
+    public static Boolean hasIntersected(double elevation, Node node1, Node node2) {
+        // Check if elevation is out of bounds
+        double lowBound = lower(node1.getY(), node2.getY());
+        double highBound = greater(node1.getY(), node2.getY());
+        Boolean intersected;
+
+        intersected = (elevation >= lowBound) && (elevation <= highBound);
+
+        return intersected;
+    }
+
+    public static double lower(double x, double y) {
+        double lower = x;
+        if (y < x) {
+            lower = y;
+        }
+        return lower;
+    }
+
+    public static double greater(double x, double y) {
+        double greater = x;
+
+        if (x < y) {
+            greater = y;
+        }
+
+        return greater;
     }
 
     private static double interpolate(double x1, double x3, double y1,
                                       double y2, double y3) {
         return (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
+    }
+
+    private static void printString(String str) {
+        System.out.println(str);
+    }
+
+    private static List<Node> sortNodesByAbscissa(List<Node> nodes) {
+        // Bubble sort
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            for (int j = 0; j < nodes.size() - 1; j++) {
+                if (nodes.get(i).getX() < nodes.get(i + 1).getX()) {
+                    // Swap nodes
+                    Node temp = nodes.get(i);
+                    nodes.set(i, nodes.get(i + 1));
+                    nodes.set(i + 1, temp);
+                }
+            }
+        }
+        return nodes;
     }
 }
