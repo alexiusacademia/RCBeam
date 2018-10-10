@@ -1,15 +1,15 @@
 package com.structuralengineering.rcbeam.properties;
 
-public class BeamSectionNode {
+public class Node {
     // Represents a node
     private double x, y;
 
-    public BeamSectionNode(double lx, double ly) {
+    public Node(double lx, double ly) {
         this.x = lx;
         this.y = ly;
     }
 
-    public BeamSectionNode() {
+    public Node() {
 
     }
 

@@ -13,7 +13,8 @@ public class BeamSection {
     //
     // = = = = = = = = = = = = = = = = = = = = = =
 
-    private List<BeamSectionNode> section;              // Beam section definition.
+    private List<Node> section;              // Beam section definition.
+    private Section sect;
     private SteelTension steelTension;                  // Tension steel property
     private SteelCompression steelCompression;          // Compression steel property
     private double effectiveDepth;                      // Depth of tension steel from concrete
@@ -39,7 +40,7 @@ public class BeamSection {
      *
      * @param nodes A list of x,y coordinate that defines the beam geometry
      */
-    public BeamSection(List<BeamSectionNode> nodes, Unit u) {
+    public BeamSection(List<Node> nodes, Unit u) {
         // Initializations
         this.steelTension = new SteelTension();
         this.steelCompression = new SteelCompression();
@@ -81,7 +82,7 @@ public class BeamSection {
      *
      * @return section
      */
-    public List<BeamSectionNode> getSection() {
+    public List<Node> getSection() {
         return this.section;
     }
 
@@ -188,6 +189,10 @@ public class BeamSection {
     //
     // = = = = = = = = = = = = = = = = = = = = = =
 
+    public void setSect(Section sect) {
+        this.sect = sect;
+    }
+
     /**
      * Gets the concrete compressive strength.
      *
@@ -271,9 +276,9 @@ public class BeamSection {
      * Add a single node to the beam section. Addition of nodes
      * must follow a clockwise notation.
      *
-     * @param node BeamSectionNode to be added.
+     * @param node Node to be added.
      */
-    public void addNode(BeamSectionNode node) {
+    public void addNode(Node node) {
         this.section.add(node);
     }
 

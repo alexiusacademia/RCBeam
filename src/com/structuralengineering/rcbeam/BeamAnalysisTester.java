@@ -4,38 +4,37 @@ import com.structuralengineering.rcbeam.analysis.BeamAnalyses;
 import com.structuralengineering.rcbeam.analysis.BeamAnalysisResult;
 import com.structuralengineering.rcbeam.analysis.StressDistribution;
 import com.structuralengineering.rcbeam.properties.BeamSection;
-import com.structuralengineering.rcbeam.properties.BeamSectionNode;
+import com.structuralengineering.rcbeam.properties.Node;
 import com.structuralengineering.rcbeam.properties.SteelTension;
 import com.structuralengineering.rcbeam.properties.Unit;
-import com.structuralengineering.rcbeam.utils.Calculators;
 
 public class BeamAnalysisTester {
 
     public static void main(String[] args) {
         BeamSection bs = new BeamSection();
         // Rectangular
-        /*bs.addNode(new BeamSectionNode(0,0));
-        bs.addNode(new BeamSectionNode(0,450));
-        bs.addNode(new BeamSectionNode(300,450));
-        bs.addNode(new BeamSectionNode(300,0));*/
+        /*bs.addNode(new Node(0,0));
+        bs.addNode(new Node(0,450));
+        bs.addNode(new Node(300,450));
+        bs.addNode(new Node(300,0));*/
         // Triangular
-        bs.addNode(new BeamSectionNode(0, 0));
-        bs.addNode(new BeamSectionNode(150, 600));
-        bs.addNode(new BeamSectionNode(300, 0));
+        bs.addNode(new Node(0, 0));
+        bs.addNode(new Node(150, 600));
+        bs.addNode(new Node(300, 0));
         // T-Beam
-        /*bs.addNode(new BeamSectionNode(0, 0));
-        bs.addNode(new BeamSectionNode(0, 360));
-        bs.addNode(new BeamSectionNode(-1150, 360));
-        bs.addNode(new BeamSectionNode(-1150, 485));
-        bs.addNode(new BeamSectionNode(1400, 485));
-        bs.addNode(new BeamSectionNode(1400, 360));
-        bs.addNode(new BeamSectionNode(250, 360));
-        bs.addNode(new BeamSectionNode(250, 0));*/
+        /*bs.addNode(new Node(0, 0));
+        bs.addNode(new Node(0, 360));
+        bs.addNode(new Node(-1150, 360));
+        bs.addNode(new Node(-1150, 485));
+        bs.addNode(new Node(1400, 485));
+        bs.addNode(new Node(1400, 360));
+        bs.addNode(new Node(250, 360));
+        bs.addNode(new Node(250, 0));*/
         // Rectangular
-        /*bs.addNode(new BeamSectionNode(0, 0));
-        bs.addNode(new BeamSectionNode(0, 500));
-        bs.addNode(new BeamSectionNode(300, 500));
-        bs.addNode(new BeamSectionNode(300, 0));*/
+        /*bs.addNode(new Node(0, 0));
+        bs.addNode(new Node(0, 500));
+        bs.addNode(new Node(300, 500));
+        bs.addNode(new Node(300, 0));*/
 
         bs.setFcPrime(20);
         bs.setEffectiveDepth(550);
@@ -54,7 +53,7 @@ public class BeamAnalysisTester {
         BeamAnalysisResult nominalWhitney = analyses.beamCapacityAnalysis(StressDistribution.WHITNEY);
         printString("Mn(Whitney) = " + nominalWhitney.getMomentC() / Math.pow(1000, 2));
 
-        BeamAnalysisResult uncrack = analyses.beforeCrackAnalysis();
+        BeamAnalysisResult uncrack = analyses.uncrackedAnalysis();
         printString("Mcr = " + analyses.getCrackingMoment());
         printString("Asmin = " + analyses.getMinimumSteelTensionArea());
     }

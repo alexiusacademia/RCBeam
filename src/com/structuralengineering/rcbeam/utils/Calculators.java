@@ -1,6 +1,6 @@
 package com.structuralengineering.rcbeam.utils;
 
-import com.structuralengineering.rcbeam.properties.BeamSectionNode;
+import com.structuralengineering.rcbeam.properties.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +12,9 @@ public class Calculators {
      * @param nodes Points/vertices of the unclosed polygon.
      * @return Area of the polygon.
      */
-    public static double calculateArea(List<BeamSectionNode> nodes) {
+    public static double calculateArea(List<Node> nodes) {
         // Add the first node to the end of points.
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         newNodes.addAll(nodes);
 
@@ -43,10 +43,10 @@ public class Calculators {
      * @param nodes Polygon definition
      * @return centroid
      */
-    public static double calculateCentroidY(List<BeamSectionNode> nodes) {
+    public static double calculateCentroidY(List<Node> nodes) {
         double kd = 0;
 
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         newNodes.addAll(nodes);
 
@@ -75,10 +75,10 @@ public class Calculators {
      * @param nodes Set of vertices.
      * @return Lowest y.
      */
-    public static double lowestY(List<BeamSectionNode> nodes) {
+    public static double lowestY(List<Node> nodes) {
         double lowest = nodes.get(0).getY();
 
-        for (BeamSectionNode node : nodes) {
+        for (Node node : nodes) {
             if (node.getY() < lowest) {
                 lowest = node.getY();
             }
@@ -93,10 +93,10 @@ public class Calculators {
      * @param nodes Set of vertices.
      * @return Highest y.
      */
-    public static double highestY(List<BeamSectionNode> nodes) {
+    public static double highestY(List<Node> nodes) {
         double highest = nodes.get(0).getY();
 
-        for (BeamSectionNode node : nodes) {
+        for (Node node : nodes) {
             if (node.getY() > highest) {
                 highest = node.getY();
             }
@@ -105,9 +105,9 @@ public class Calculators {
         return highest;
     }
 
-    public static double getCentroidAboveAxis(double axisElevation, List<BeamSectionNode> nodes) {
+    public static double getCentroidAboveAxis(double axisElevation, List<Node> nodes) {
         // Hold the new nodes
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         int intersected = 0;
         boolean isAbove = false;
@@ -128,7 +128,7 @@ public class Calculators {
                 if ((y1 <= axisElevation && y3 > axisElevation) ||
                         (y1 >= axisElevation && y3 < axisElevation)) {
                     // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
+                    newNodes.add(new Node(x2, y2));
                     intersected++;
                 }
             }
@@ -141,9 +141,9 @@ public class Calculators {
         return calculateCentroidY(newNodes);
     }
 
-    public static double getAreaAboveAxis(double axisElevation, List<BeamSectionNode> nodes) {
+    public static double getAreaAboveAxis(double axisElevation, List<Node> nodes) {
         // Hold the new nodes
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+        List<Node> newNodes = new ArrayList<>();
 
         int intersected = 0;
         boolean isAbove = false;
@@ -165,7 +165,7 @@ public class Calculators {
                 if ((y1 <= axisElevation && y3 > axisElevation) ||
                         (y1 >= axisElevation && y3 < axisElevation)) {
                     // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
+                    newNodes.add(new Node(x2, y2));
                     intersected++;
                 }
             }
@@ -185,55 +185,134 @@ public class Calculators {
         return calculateArea(newNodes);
     }
 
-    /**
-     * Calculate beam width at y from neutral axis
-     *
-     * @param yElev Elevation of point of interest
-     * @param nodes Beam nodes
-     * @return Width
-     */
-    public static double getBaseAtY(double yElev, List<BeamSectionNode> nodes) {
-        // Hold the new nodes
-        List<BeamSectionNode> newNodes = new ArrayList<>();
+    public static List<Node> getNewNodes(double yElev, List<Node> nodes) {
+        nodes.add(nodes.get(0));
+        List<Node> newNodes = new ArrayList<>();
 
-        int intersected = 0;
-        boolean isAbove = false;
+        newNodes.add(nodes.get(0));
 
-        double x1, x2, x3;
-        double y1, y2, y3;
-        y2 = yElev;
-
-        // Iterate to each node to look for intersection
         for (int i = 1; i < nodes.size(); i++) {
-            if (intersected < 2) {
-                y1 = nodes.get(i - 1).getY();
-                y3 = nodes.get(i).getY();
-                x1 = nodes.get(i - 1).getX();
-                x3 = nodes.get(i).getX();
-                x2 = interpolate(x1, x3, y1, y2, y3);
-                if (y1 <= yElev && y3 > yElev) {
-                    // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
-                    intersected++;
-                }
-                if (y1 >= yElev && y3 < yElev) {
-                    // We got intersection
-                    newNodes.add(new BeamSectionNode(x2, y2));
-                    intersected++;
-                }
+
+            if (hasIntersected(yElev, nodes.get(i - 1), nodes.get(i))) {
+                // Get the intersection point
+                Node n = getIntersection(yElev, nodes.get(i - 1), nodes.get(i));
+                newNodes.add(n);
+            }
+            newNodes.add(nodes.get(i));
+        }
+
+        // Now remove every node that is below the axis
+        newNodes.remove(newNodes.size() - 1);
+
+        for (int i = 0; i < newNodes.size(); i++) {
+            if (newNodes.get(i).getY() < yElev) {
+                newNodes.remove(i);
             }
         }
 
+        return newNodes;
+    }
+
+    public static double getBaseAtY(double yElev, List<Node> nodes) {
+        List<Node> newNodes = nodes;
+        newNodes.add(nodes.get(0));
+
+        List<Node> intersectionNodes = new ArrayList<>();
+
         double base = 0;
-        if (newNodes.size() == 2) {
-            base = Math.abs(newNodes.get(0).getX() - newNodes.get(1).getX());
+
+        for (int i = 1; i < newNodes.size(); i++) {
+            // Check intersection
+            if (hasIntersected(yElev, newNodes.get(i-1), newNodes.get(i))) {
+                intersectionNodes.add(getIntersection(yElev, newNodes.get(i - 1), newNodes.get(i)));
+            }
         }
 
-        return base;
+        // Rearrange nodes based on abscissa
+        List<Node> rearrangedNodes = sortNodesByAbscissa(intersectionNodes);
+
+        for (int i = 0; i < rearrangedNodes.size() - 1; i += 2) {
+            base += rearrangedNodes.get(i).getX() - rearrangedNodes.get(i + 1).getX();
+        }
+
+        return Math.abs(base);
+    }
+
+    public static Node getIntersection(double elevation, Node node1, Node node2) {
+        double y1, y2, y3, x1, x2, x3;
+        y1 = node1.getY();
+        y2 = elevation;
+        y3 = node2.getY();
+        x1 = node1.getX();
+        x3 = node2.getX();
+        /*
+        x2 - x1     y2 - y1
+        ------- =  ---------
+        x3 - x1     y3 - y1
+         */
+        x2 = (y2 - y1) / (y3 - y1) * (x3 - x1) + x1;
+
+        return new Node(x2, y2);
+    }
+
+    public static Boolean hasIntersected(double elevation, Node node1, Node node2) {
+        // Check if elevation is out of bounds
+        double lowBound = lower(node1.getY(), node2.getY());
+        double highBound = greater(node1.getY(), node2.getY());
+        Boolean intersected;
+
+        intersected = (elevation >= lowBound) && (elevation <= highBound);
+
+        return intersected;
+    }
+
+    public static double lower(double x, double y) {
+        double lower = x;
+        if (y < x) {
+            lower = y;
+        }
+        return lower;
+    }
+
+    public static double greater(double x, double y) {
+        double greater = x;
+
+        if (x < y) {
+            greater = y;
+        }
+
+        return greater;
     }
 
     private static double interpolate(double x1, double x3, double y1,
                                       double y2, double y3) {
         return (y2 - y3) / (y1 - y3) * (x1 - x3) + x3;
+    }
+
+    private static void printString(String str) {
+        System.out.println(str);
+    }
+
+    private static List<Node> sortNodesByAbscissa(List<Node> nodes) {
+        // Bubble sort
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            for (int j = 0; j < nodes.size() - 1; j++) {
+                if (nodes.get(i).getX() < nodes.get(i + 1).getX()) {
+                    // Swap nodes
+                    Node temp = nodes.get(i);
+                    nodes.set(i, nodes.get(i + 1));
+                    nodes.set(i + 1, temp);
+                }
+            }
+        }
+        return nodes;
+    }
+
+    public static double distanceBetweenTwoNodes(Node n1, Node n2) {
+        double dist = 0;
+
+        dist = Math.sqrt(Math.pow(n1.getY() - n2.getY(), 2) + Math.pow(n1.getX() - n2.getX(), 2));
+
+        return dist;
     }
 }

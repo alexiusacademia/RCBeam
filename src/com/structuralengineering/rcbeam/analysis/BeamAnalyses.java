@@ -86,9 +86,9 @@ public class BeamAnalyses {
      *
      * @return BeamAnalysisResult of the un-cracked section.
      */
-    public BeamAnalysisResult beforeCrackAnalysis() {
+    public BeamAnalysisResult uncrackedAnalysis() {
         BeamAnalysisResult analysis = new BeamAnalysisResult();
-        List<BeamSectionNode> beamSectionNodes = this.beamSection.getSection();
+        List<Node> beamSectionNodes = this.beamSection.getSection();
 
         double fr = beamSection.getFr();                                      // Modulus of rupture
         double Ec = beamSection.getEc();                                      // Concrete secant modulus
@@ -173,6 +173,7 @@ public class BeamAnalyses {
             McrTrial = 0.85 * this.beamSection.getFcPrime() * compressionArea * (d - yTop);
             a += 0.001;
         }
+        this.crackingMoment = Mcr;
 
         this.minimumSteelTensionArea = Mcr / (fy * (d - yTop));
 
@@ -196,7 +197,7 @@ public class BeamAnalyses {
     public BeamAnalysisResult beamCapacityAnalysis(StressDistribution sd) {
         BeamAnalysisResult analysis = new BeamAnalysisResult();
 
-        List<BeamSectionNode> nodes = this.beamSection.getSection();
+        List<Node> nodes = this.beamSection.getSection();
         double ⲉcu = BeamContants.MAX_CONCRETE_STRAIN;
         double Es = BeamContants.ES;
         double d = this.beamSection.getEffectiveDepth();
@@ -336,7 +337,7 @@ public class BeamAnalyses {
     public BeamAnalysisResult balancedAnalysis(StressDistribution sd) {
         BeamAnalysisResult result = new BeamAnalysisResult();
 
-        List<BeamSectionNode> nodes = this.beamSection.getSection();
+        List<Node> nodes = this.beamSection.getSection();
         double ⲉcu = BeamContants.MAX_CONCRETE_STRAIN;
         double Es = BeamContants.ES;
         double d = this.beamSection.getEffectiveDepth();
@@ -440,7 +441,7 @@ public class BeamAnalyses {
                                                    double kd,
                                                    double ⲉcu,
                                                    double highestElev) {
-        List<BeamSectionNode> nodes = this.beamSection.getSection();
+        List<Node> nodes = this.beamSection.getSection();
         double fc, b, Cc = 0;
         int iterator = BeamContants.COMPRESSION_SOLID_DY_ITERATION;
         double dy = kd / iterator;          // Strip height
@@ -465,7 +466,7 @@ public class BeamAnalyses {
     private double compressionSolidVolumeTriangular(double kd,
                                                     double highestElev,
                                                     double fc) {
-        List<BeamSectionNode> nodes = this.beamSection.getSection();
+        List<Node> nodes = this.beamSection.getSection();
         double fcy, b, Cc = 0;
         int iterator = 10000000;
         double dy = kd / iterator;          // Strip height
@@ -484,7 +485,7 @@ public class BeamAnalyses {
                                                 double highestElev,
                                                 double fr) {
 
-        List<BeamSectionNode> nodes = this.beamSection.getSection();
+        List<Node> nodes = this.beamSection.getSection();
         double fry, by, Tc = 0;
         int iterator = 10000000;
         double dy = z / iterator;          // Strip height
