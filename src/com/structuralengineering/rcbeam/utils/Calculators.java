@@ -192,18 +192,21 @@ public class Calculators {
         newNodes.add(nodes.get(0));
 
         for (int i = 1; i < nodes.size(); i++) {
-            newNodes.add(nodes.get(i));
+
             if (hasIntersected(yElev, nodes.get(i - 1), nodes.get(i))) {
                 // Get the intersection point
                 Node n = getIntersection(yElev, nodes.get(i - 1), nodes.get(i));
-                newNodes.add(i + 1, n);
+                newNodes.add(n);
             }
+            newNodes.add(nodes.get(i));
         }
 
         // Now remove every node that is below the axis
+        newNodes.remove(newNodes.size() - 1);
+
         for (int i = 0; i < newNodes.size(); i++) {
             if (newNodes.get(i).getY() < yElev) {
-                newNodes.remove(newNodes.get(i));
+                newNodes.remove(i);
             }
         }
 
@@ -303,5 +306,13 @@ public class Calculators {
             }
         }
         return nodes;
+    }
+
+    public static double distanceBetweenTwoNodes(Node n1, Node n2) {
+        double dist = 0;
+
+        dist = Math.sqrt(Math.pow(n1.getY() - n2.getY(), 2) + Math.pow(n1.getX() - n2.getX(), 2));
+
+        return dist;
     }
 }

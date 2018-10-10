@@ -14,6 +14,7 @@ public class BeamSection {
     // = = = = = = = = = = = = = = = = = = = = = =
 
     private List<Node> section;              // Beam section definition.
+    private Section sect;
     private SteelTension steelTension;                  // Tension steel property
     private SteelCompression steelCompression;          // Compression steel property
     private double effectiveDepth;                      // Depth of tension steel from concrete
@@ -187,6 +188,10 @@ public class BeamSection {
     // Setters
     //
     // = = = = = = = = = = = = = = = = = = = = = =
+
+    public void setSect(Section sect) {
+        this.sect = sect;
+    }
 
     /**
      * Gets the concrete compressive strength.
