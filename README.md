@@ -3,9 +3,12 @@
 A java library for the analysis of reinforced concrete beams of any section.
 
 ### Section Features
-- Non-Hollow Sections
+- Hollow Sections
 - Any shape (provided with `x,y` coordinates) except rounded
 - Default unit is metric
+
+### Limitations
+- Horizontal line intersection in a polygon must not exceed 2.
 
 ### Analysis Results
 
@@ -40,25 +43,31 @@ sc.setdPrime(50, Unit.METRIC);
 
 ```java
 // Creating object
-BeamSection bs = new BeamSection();
+BeamSection beam = new BeamSection();
 
-// Defining shape
-bs.addNode(new BeamSectionNode(0, 0));
-bs.addNode(new BeamSectionNode(0, 500));
-bs.addNode(new BeamSectionNode(300, 500));
-bs.addNode(new BeamSectionNode(300, 0));
+// Create section shape
+Section section = new Section();
+List<Node> mainSection = new ArrayList();
+mainSection.add(new BeamSectionNode(0, 0));
+mainSection.add(new BeamSectionNode(0, 500));
+mainSection.add(new BeamSectionNode(300, 500));
+mainSection.add(new BeamSectionNode(300, 0));
+
+section.setMainSection(mainSection);
+
+beam.setSection(section);
 
 // Define unit
-bs.setUnit(Unit.METRIC);
+beam.setUnit(Unit.METRIC);
 
 // Define properties
-bs.setFcPrime(21);
-bs.setEffectiveDepth(450);
-bs.setFy(275);
+beam.setFcPrime(21);
+beam.setEffectiveDepth(450);
+beam.setFy(275);
 
 // Define reinforcements
-bs.setSteelTension(st);
-bs.setSteelCompression(sc);
+beam.setSteelTension(st);
+beam.setSteelCompression(sc);
 ```
 
 ### Creating an Analysis
