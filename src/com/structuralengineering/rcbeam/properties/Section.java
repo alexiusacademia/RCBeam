@@ -103,10 +103,13 @@ public class Section {
                 mainSectionIntersections.add(intersection);
             }
         }
-
-        // Width of the main section
-        width = Calculators.distanceBetweenTwoNodes(mainSectionIntersections.get(0),
-                mainSectionIntersections.get(1));
+        if (mainSectionIntersections.size() != 2) {
+            width = 0;
+        } else {
+            // Width of the main section
+            width = Calculators.distanceBetweenTwoNodes(mainSectionIntersections.get(0),
+                    mainSectionIntersections.get(1));
+        }
 
         List<Node> clipIntersection = new ArrayList<>();
         // Collect all the clippings
@@ -128,7 +131,7 @@ public class Section {
                 this.hasError = true;
                 this.errMessage = "Invalid clipping polygon.";
                 break;
-            } else {
+            } else if (clips.size() == 2) {
                 width -= Calculators.distanceBetweenTwoNodes(clips.get(0), clips.get(1));
             }
         }
