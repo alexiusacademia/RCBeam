@@ -70,6 +70,22 @@ beam.setSteelTension(st);
 beam.setSteelCompression(sc);
 ```
 
+### Creating a hollow section
+Hollow portions are needed to define a hollow sections or sections that may have more than
+ 2 intersections if you draw a horizontal line at any point.
+ For example, if you want to draw a section above with a v-shape cut at the top,
+ you could use the following snippet as a guide:
+```java
+List<Node> clipping = new ArrayList();
+clipping.add(new Node(100, 500));
+clipping.add(new Node(200, 500));
+clipping.add(new Node(150, 350));
+clipping.add(new Node(100, 500));
+
+section.addClipping(clipping);
+
+```
+
 ### Creating an Analysis
 
 ```java
@@ -77,7 +93,7 @@ beam.setSteelCompression(sc);
 BeamAnalyses analyses = new BeamAnalyses(bs);
 
 // Defining a result from the analysis
-BeamAnalysisResult uncrackAnalysis = analyses.beforeCrackAnalysis();
+BeamAnalysisResult uncrackAnalysis = analyses.uncrackedAnalysis();
 
 // Accessing the result
 // Cracking moment
