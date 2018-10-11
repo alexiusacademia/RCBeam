@@ -19,11 +19,6 @@ public class BeamSectionTester {
         mainSection.add(new Node(10,10));
         mainSection.add(new Node(10,0));
         mainSection.add(new Node(0,0));
-        /*mainSection.add(new Node(2,2));
-        mainSection.add(new Node(2,8));
-        mainSection.add(new Node(8,8));
-        mainSection.add(new Node(8,2));
-        mainSection.add(new Node(2,2));*/
 
         List<Node> clip1 = new ArrayList<>();
         clip1.add(new Node(2, 2));
@@ -32,10 +27,12 @@ public class BeamSectionTester {
         clip1.add(new Node(8, 2));
 
         Section section = new Section();
-        section.setMainSection(mainSection);
-        section.addClipping(clip1);
-
-        printString(String.valueOf(section.getEffectiveWidth(5)));
+        if (section.setMainSection(mainSection)) {
+            if (section.addClipping(clip1)) {
+                printString("Width at (el. 5.0) : " + String.valueOf(section.getEffectiveWidth(5)));
+                printString("Area : " + section.grossAreaOfConcrete());
+            }
+        }
     }
 
     private static void printString(String str) {
