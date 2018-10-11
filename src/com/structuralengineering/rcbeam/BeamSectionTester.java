@@ -31,6 +31,7 @@ public class BeamSectionTester {
             if (section.addClipping(clip1)) {
                 printString("Width at (el. 5.0) : " + String.valueOf(section.getEffectiveWidth(5)));
                 printString("Area : " + section.grossAreaOfConcrete());
+                printString("kd at 5 : " + section.centroidAboveAxis(5));
             }
         }
     }
