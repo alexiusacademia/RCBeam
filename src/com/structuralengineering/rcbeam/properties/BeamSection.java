@@ -12,9 +12,7 @@ public class BeamSection {
     // Properties
     //
     // = = = = = = = = = = = = = = = = = = = = = =
-
-    private List<Node> section;              // Beam section definition.
-    private Section sect;
+    private Section section;
     private SteelTension steelTension;                  // Tension steel property
     private SteelCompression steelCompression;          // Compression steel property
     private double effectiveDepth;                      // Depth of tension steel from concrete
@@ -34,29 +32,12 @@ public class BeamSection {
     // Constructors
     //
     // = = = = = = = = = = = = = = = = = = = = = =
-
-    /**
-     * Constructor with defined section nodes
-     *
-     * @param nodes A list of x,y coordinate that defines the beam geometry
-     */
-    public BeamSection(List<Node> nodes, Unit u) {
-        // Initializations
-        this.steelTension = new SteelTension();
-        this.steelCompression = new SteelCompression();
-
-        // Assignments
-        this.section = nodes;
-        this.unit = u;
-    }
-
     /**
      * Empty constructor
      * Sets the default unit to METRIC
      */
     public BeamSection() {
         // Initializations
-        this.section = new ArrayList<>();
         this.steelTension = new SteelTension();
         this.steelCompression = new SteelCompression();
         this.unit = Unit.METRIC;
@@ -82,7 +63,7 @@ public class BeamSection {
      *
      * @return section
      */
-    public List<Node> getSection() {
+    public Section getSection() {
         return this.section;
     }
 
@@ -188,9 +169,8 @@ public class BeamSection {
     // Setters
     //
     // = = = = = = = = = = = = = = = = = = = = = =
-
-    public void setSect(Section sect) {
-        this.sect = sect;
+    public void setSection(Section section) {
+        this.section = section;
     }
 
     /**
@@ -271,30 +251,6 @@ public class BeamSection {
     // Methods
     //
     // = = = = = = = = = = = = = = = = = = = = = =
-
-    /**
-     * Add a single node to the beam section. Addition of nodes
-     * must follow a clockwise notation.
-     *
-     * @param node Node to be added.
-     */
-    public void addNode(Node node) {
-        this.section.add(node);
-    }
-
-    /**
-     * Remove a node at a specified index.
-     *
-     * @param index The index in which the item is to be removed from.
-     */
-    public void removeNode(int index) {
-        // Check if index exist
-        if ((index - 1) < this.section.size()) {
-            // Index surely exist
-            // Remove the item
-            this.section.remove(index);
-        }
-    }
 
     /**
      * Calculates the modular ratio.

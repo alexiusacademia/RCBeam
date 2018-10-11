@@ -213,7 +213,7 @@ public class Calculators {
         return newNodes;
     }
 
-    public static double getBaseAtY(double yElev, List<Node> nodes) {
+    /*public static double getBaseAtY(double yElev, List<Node> nodes) {
         List<Node> newNodes = nodes;
         newNodes.add(nodes.get(0));
 
@@ -236,7 +236,7 @@ public class Calculators {
         }
 
         return Math.abs(base);
-    }
+    }*/
 
     public static Node getIntersection(double elevation, Node node1, Node node2) {
         double y1, y2, y3, x1, x2, x3;

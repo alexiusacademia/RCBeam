@@ -71,13 +71,25 @@ public class Section {
         return area;
     }
 
+    public double getHeight() {
+        return Calculators.highestY(this.mainSection) - Calculators.lowestY(this.mainSection);
+    }
+
+    public double getNeutralAxisElevation() {
+        return Calculators.highestY(this.mainSection) - centroid();
+    }
+
+    public List<Node> getMainSection() {
+        return mainSection;
+    }
+
     /**
      * Get the effective width of a section at a certain elevation
      * deducting all hollow polygons.
      * @param elevation Point where effective width is being looked at.
      * @return width Effective width.
      */
-    public double getEffectiveWidth(int elevation) {
+    public double getEffectiveWidth(double elevation) {
         double width;
         List<Node> mainSectionIntersections = new ArrayList<>();
         List<List<Node>> clippingsIntersections = new ArrayList<>();

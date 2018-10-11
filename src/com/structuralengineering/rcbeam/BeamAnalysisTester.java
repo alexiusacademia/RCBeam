@@ -3,24 +3,29 @@ package com.structuralengineering.rcbeam;
 import com.structuralengineering.rcbeam.analysis.BeamAnalyses;
 import com.structuralengineering.rcbeam.analysis.BeamAnalysisResult;
 import com.structuralengineering.rcbeam.analysis.StressDistribution;
-import com.structuralengineering.rcbeam.properties.BeamSection;
-import com.structuralengineering.rcbeam.properties.Node;
-import com.structuralengineering.rcbeam.properties.SteelTension;
-import com.structuralengineering.rcbeam.properties.Unit;
+import com.structuralengineering.rcbeam.properties.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BeamAnalysisTester {
 
     public static void main(String[] args) {
         BeamSection bs = new BeamSection();
+        List<Node> nodes = new ArrayList<>();
         // Rectangular
         /*bs.addNode(new Node(0,0));
         bs.addNode(new Node(0,450));
         bs.addNode(new Node(300,450));
         bs.addNode(new Node(300,0));*/
         // Triangular
-        bs.addNode(new Node(0, 0));
-        bs.addNode(new Node(150, 600));
-        bs.addNode(new Node(300, 0));
+        nodes.add(new Node(0, 0));
+        nodes.add(new Node(150, 600));
+        nodes.add(new Node(300, 0));
+
+        Section section = new Section();
+        section.setMainSection(nodes);
+
         // T-Beam
         /*bs.addNode(new Node(0, 0));
         bs.addNode(new Node(0, 360));

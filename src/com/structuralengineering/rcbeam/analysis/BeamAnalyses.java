@@ -23,6 +23,7 @@ public class BeamAnalyses {
     private double curvatureAfterCracking;
     private double balacedSteelTension;                         // Required steel area for balanced design
     private Unit unit;
+    private Section section;
 
     /**
      * Constructor that provides the beam section to be analyzed
@@ -88,14 +89,13 @@ public class BeamAnalyses {
      */
     public BeamAnalysisResult uncrackedAnalysis() {
         BeamAnalysisResult analysis = new BeamAnalysisResult();
-        List<Node> beamSectionNodes = this.beamSection.getSection();
+        Section sectionGeometry = this.beamSection.getSection();
 
-        double fr = beamSection.getFr();                                      // Modulus of rupture
-        double Ec = beamSection.getEc();                                      // Concrete secant modulus
-        double h = Calculators.highestY(beamSectionNodes) -
-                Calculators.lowestY(beamSectionNodes);
-        double Ac = Calculators.calculateArea(beamSectionNodes);              // Area of concrete alone
-        double yc = Calculators.calculateCentroidY(beamSectionNodes);         // Calculate centroid from extreme compression fiber.
+        double fr = beamSection.getFr();                                    // Modulus of rupture
+        double Ec = beamSection.getEc();                                    // Concrete secant modulus
+        double h = sectionGeometry.getHeight();
+        double Ac = sectionGeometry.grossAreaOfConcrete();                  // Area of concrete alone
+        double yc = sectionGeometry.centroid();                             // Calculate centroid from extreme compression fiber.
         double d = beamSection.getEffectiveDepth();
         double dPrime = beamSection.getSteelCompression().getdPrime(this.beamSection.getUnit());
         double fy = beamSection.getFy();
@@ -123,14 +123,14 @@ public class BeamAnalyses {
 
         double kd;                                                        // Neutral axis to extreme compression fiber.
         kd = Ma / At;
-        double kdY = Calculators.highestY(beamSectionNodes) - kd;             // Elevation of kd
-        double highestElev = Calculators.highestY(beamSectionNodes);
+        double kdY = sectionGeometry.getNeutralAxisElevation();           // Elevation of kd
+        double highestElev = Calculators.highestY(sectionGeometry.getMainSection());
         double ⲉc = (fr / Ec) / (h - kd) * kd;                                // Strain in concrete compression
         double fc = ⲉc * Ec;                                                  // Concrete stress
         double fs = (fr * BeamContants.ES * (d - kd)) / (Ec * (h - kd));
         double fsPrime = (fr * BeamContants.ES * (kd - dPrime)) / (Ec * (h - kd));
-        double compressionArea = Calculators.getAreaAboveAxis(kdY, beamSectionNodes);
-        double tensionArea = Calculators.calculateArea(beamSectionNodes) - compressionArea;
+        double compressionArea = sectionGeometry.areaAboveAxis(kdY);
+        double tensionArea = sectionGeometry.grossAreaOfConcrete() - compressionArea;
         double Cc, Cs, Tc, Ts;                                                // Resultant forces
         double ycc, yct;                                                      // Location of Cc and Tc
 
@@ -168,8 +168,8 @@ public class BeamAnalyses {
         double McrTrial = 0, a = 0.001, yA, yTop = 0;
         while (McrTrial < Mcr) {
             yA = highestElev - a;
-            compressionArea = Calculators.getAreaAboveAxis(yA, beamSectionNodes);
-            yTop = Calculators.getCentroidAboveAxis(yA, beamSectionNodes);
+            compressionArea = sectionGeometry.areaAboveAxis(yA);
+            yTop = sectionGeometry.centroidAboveAxis(yA);
             McrTrial = 0.85 * this.beamSection.getFcPrime() * compressionArea * (d - yTop);
             a += 0.001;
         }
@@ -197,7 +197,7 @@ public class BeamAnalyses {
     public BeamAnalysisResult beamCapacityAnalysis(StressDistribution sd) {
         BeamAnalysisResult analysis = new BeamAnalysisResult();
 
-        List<Node> nodes = this.beamSection.getSection();
+        Section section = this.beamSection.getSection();
         double ⲉcu = BeamContants.MAX_CONCRETE_STRAIN;
         double Es = BeamContants.ES;
         double d = this.beamSection.getEffectiveDepth();
@@ -217,7 +217,7 @@ public class BeamAnalyses {
         double moment;
         double AsCalc = 0;
         double kd = 0.1;
-        double highestElev = Calculators.highestY(nodes);
+        double highestElev = Calculators.highestY(section.getMainSection());
 
         if (sd == StressDistribution.PARABOLIC) {
             // Find kd
@@ -301,8 +301,8 @@ public class BeamAnalyses {
                 fs = ⲉcu * Es * (d - kd) / kd;
                 fs = calculateFs(fs, fy);
 
-                kdY = Calculators.highestY(nodes) - a;
-                compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
+                kdY = highestElev - a;
+                compressionArea = section.areaAboveAxis(kdY);
 
                 Cc = fc * compressionArea;
 
@@ -316,7 +316,7 @@ public class BeamAnalyses {
             }
 
             double compressionCentroid;
-            compressionCentroid = Calculators.getCentroidAboveAxis(kdY, nodes);
+            compressionCentroid = section.centroidAboveAxis(kdY);
 
             moment = Cc * (d - compressionCentroid) + Cs * (d - dPrime);
         }
@@ -336,8 +336,8 @@ public class BeamAnalyses {
      */
     public BeamAnalysisResult balancedAnalysis(StressDistribution sd) {
         BeamAnalysisResult result = new BeamAnalysisResult();
+        Section section = this.beamSection.getSection();
 
-        List<Node> nodes = this.beamSection.getSection();
         double ⲉcu = BeamContants.MAX_CONCRETE_STRAIN;
         double Es = BeamContants.ES;
         double d = this.beamSection.getEffectiveDepth();
@@ -353,7 +353,7 @@ public class BeamAnalyses {
                 compressionArea;
         double kd;
         double Asb;
-        double highestElev = Calculators.highestY(nodes);
+        double highestElev = Calculators.highestY(section.getMainSection());
 
         kd = ⲉcu * Es * d / (fy + ⲉcu * Es);
 
@@ -370,8 +370,8 @@ public class BeamAnalyses {
             double beta = calculateBeta(fcPrime);
             double a;
             a = beta * kd;
-            kdY = Calculators.highestY(nodes) - a;
-            compressionArea = Calculators.getAreaAboveAxis(kdY, nodes);
+            kdY = highestElev - a;
+            compressionArea = section.areaAboveAxis(kdY);
             Cc = fc * compressionArea;
             fsPrime = ⲉcu * Es * (kd - dPrime) / kd;
             fsPrime = calculateFs(fsPrime, fy);
@@ -441,7 +441,6 @@ public class BeamAnalyses {
                                                    double kd,
                                                    double ⲉcu,
                                                    double highestElev) {
-        List<Node> nodes = this.beamSection.getSection();
         double fc, b, Cc = 0;
         int iterator = BeamContants.COMPRESSION_SOLID_DY_ITERATION;
         double dy = kd / iterator;          // Strip height
@@ -466,7 +465,6 @@ public class BeamAnalyses {
     private double compressionSolidVolumeTriangular(double kd,
                                                     double highestElev,
                                                     double fc) {
-        List<Node> nodes = this.beamSection.getSection();
         double fcy, b, Cc = 0;
         int iterator = 10000000;
         double dy = kd / iterator;          // Strip height
@@ -484,8 +482,6 @@ public class BeamAnalyses {
                                                 double kd,
                                                 double highestElev,
                                                 double fr) {
-
-        List<Node> nodes = this.beamSection.getSection();
         double fry, by, Tc = 0;
         int iterator = 10000000;
         double dy = z / iterator;          // Strip height
@@ -527,7 +523,7 @@ public class BeamAnalyses {
             fc = 0.85 * fcPrime;
         }
         double yElev = highestElev - kd + y;
-        double b = Calculators.getBaseAtY(yElev, this.beamSection.getSection());
+        double b = this.beamSection.getSection().getEffectiveWidth(yElev);
         result[0] = fc;
         result[1] = b;
         return result;
@@ -535,7 +531,6 @@ public class BeamAnalyses {
 
     /**
      * Beam compression solid strip
-     *
      * @param i           ith strip for integration
      * @param dy          height of strip
      * @param kd          trial or value of height of compression block
@@ -552,7 +547,7 @@ public class BeamAnalyses {
         double y = i * dy;
         double fcy = fc * y / kd;
         double yElev = highestElev - kd + y;
-        double by = Calculators.getBaseAtY(yElev, this.beamSection.getSection());
+        double by = this.beamSection.getSection().getEffectiveWidth(yElev);
 
         result[0] = fcy;
         result[1] = by;
@@ -570,7 +565,7 @@ public class BeamAnalyses {
         double y = i * dy;
         double fry = fr * y / z;
         double yElev = highestElev - kd - y;
-        double by = Calculators.getBaseAtY(yElev, this.beamSection.getSection());
+        double by = this.beamSection.getSection().getEffectiveWidth(yElev);
 
         result[0] = fry;
         result[1] = by;
