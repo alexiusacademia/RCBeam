@@ -148,4 +148,70 @@ public class Section {
         this.area = area;
         return area;
     }
+
+    /**
+     * Calculates the distance of the centroid of the section from
+     * the topmost node.
+     * @return kd
+     */
+    public double centroid() {
+        double kd;
+
+        // For the main section
+        double maMain = Calculators.calculateCentroidY(this.mainSection) * Calculators.calculateArea(this.mainSection);
+
+        // For each clipping
+        double highestPoint = Calculators.highestY(this.mainSection);
+        double maClippings = 0;
+        double clipHighestPoint;
+        for (List<Node> clipping : this.clippings) {
+            clipHighestPoint = Calculators.highestY(clipping);
+            maClippings += Calculators.calculateArea(clipping) *
+                    (Calculators.calculateCentroidY(clipping) +
+                            (highestPoint - clipHighestPoint));
+        }
+
+        // Gross area
+        double grossArea = grossAreaOfConcrete();
+        kd = (maMain - maClippings) / grossArea;
+
+        return kd;
+    }
+
+    public double areaAboveAxis(double yElev) {
+        double area;
+
+        double mainSectionArea = Calculators.getAreaAboveAxis(yElev, this.mainSection);
+        double clippingAreas = 0;
+        for (List<Node> clipping : this.clippings) {
+            clippingAreas += Calculators.getAreaAboveAxis(yElev, clipping);
+        }
+
+        area = mainSectionArea - clippingAreas;
+        return area;
+    }
+
+    public double centroidAboveAxis(double yElev) {
+        double kd;
+
+        double maMainSection, mainSectionArea, mainY;
+        double maClippingSections = 0, clippingSectionAreas = 0;
+
+        mainY = Calculators.getCentroidAboveAxis(yElev, this.mainSection);
+        mainSectionArea = Calculators.getAreaAboveAxis(yElev, this.mainSection);
+        maMainSection = mainY * mainSectionArea;
+
+        for (List<Node> clipping : this.clippings) {
+            double area, y;
+            area = Calculators.getAreaAboveAxis(yElev, clipping);
+            y = Calculators.getCentroidAboveAxis(yElev, clipping) +
+                    Calculators.highestY(this.mainSection) - Calculators.highestY(clipping);
+            clippingSectionAreas += area;
+            maClippingSections += area * y;
+        }
+
+        kd = (maMainSection - maClippingSections) / (mainSectionArea - clippingSectionAreas);
+
+        return kd;
+    }
 }
