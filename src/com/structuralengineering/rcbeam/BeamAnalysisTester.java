@@ -26,6 +26,8 @@ public class BeamAnalysisTester {
         Section section = new Section();
         section.setMainSection(nodes);
 
+        bs.setSection(section);
+
         // T-Beam
         /*bs.addNode(new Node(0, 0));
         bs.addNode(new Node(0, 360));
