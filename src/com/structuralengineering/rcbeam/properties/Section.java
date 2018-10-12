@@ -25,26 +25,27 @@ public class Section {
     public boolean setMainSection(List<Node> mainSection) {
         // Check number of nodes
         if (mainSection.size() < 3) {
-            this.hasError = true;
-            this.errMessage = "Invalid polygon. Too few nodes.";
+            errorOccured("Invalid polygon. Too few nodes.");
             return false;
         } else {
-            this.hasError = false;
-            this.errMessage = "Success";
+            noError();
             this.mainSection = mainSection;
             return true;
         }
     }
 
+    /**
+     * Set list of clippings for a hollow section.
+     * @param clippings Collection of collection of nodes.
+     * @return true if there is no error.
+     */
     public boolean setClippings(List<List<Node>> clippings) {
         for (List<Node> clipping : clippings) {
             if (clipping.size() < 3) {
-                this.hasError = true;
-                this.errMessage = "One of more clipping polygon has too few nodes.";
+                errorOccured("One of more clipping polygon has too few nodes.");
                 return false;
             } else {
-                this.hasError = false;
-                this.errMessage = "Success";
+                noError();
             }
         }
         return true;
@@ -52,34 +53,43 @@ public class Section {
 
     public boolean addClipping(List<Node> clipping) {
         if (clipping.size() < 3) {
-            this.hasError = true;
-            this.errMessage = "Invalid polygon. Too few nodes.";
+            errorOccured("Invalid polygon. Too few nodes.");
             return false;
         } else {
-            this.hasError = false;
-            this.errMessage = "Success";
+            noError();
             this.clippings.add(clipping);
             return true;
         }
     }
 
-    public void removeClipping(int index) {
-        this.clippings.remove(index);
+    public boolean removeClipping(int index) {
+        if (this.clippings.size() < index+1) {
+            errorOccured("The index may not exist.");
+            return false;
+        } else {
+            noError();
+            this.clippings.remove(index);
+            return true;
+        }
     }
 
     public double getArea() {
+        noError();
         return area;
     }
 
     public double getHeight() {
+        noError();
         return Calculators.highestY(this.mainSection) - Calculators.lowestY(this.mainSection);
     }
 
     public double getNeutralAxisElevation() {
+        noError();
         return Calculators.highestY(this.mainSection) - centroid();
     }
 
     public List<Node> getMainSection() {
+        noError();
         return mainSection;
     }
 
@@ -105,13 +115,16 @@ public class Section {
         }
         if (mainSectionIntersections.size() != 2) {
             width = 0;
+            return width;
         } else {
             // Width of the main section
             width = Calculators.distanceBetweenTwoNodes(mainSectionIntersections.get(0),
                     mainSectionIntersections.get(1));
         }
 
+        // For intersections at clippings
         List<Node> clipIntersection = new ArrayList<>();
+
         // Collect all the clippings
         for (List<Node> clip : this.clippings) {
             clipIntersection.clear();
@@ -125,17 +138,18 @@ public class Section {
             clippingsIntersections.add(clipIntersection);
         }
 
+        // Deduct total width of holes.
         for (List<Node> clips : clippingsIntersections) {
             if (clips.size() > 2) {
                 // Too much intersections. Should be limited to 2
-                this.hasError = true;
-                this.errMessage = "Invalid clipping polygon.";
+                errorOccured("Invalid clipping polygon.");
                 break;
             } else if (clips.size() == 2) {
                 width -= Calculators.distanceBetweenTwoNodes(clips.get(0), clips.get(1));
             }
         }
 
+        noError();
         return width;
     }
 
@@ -148,6 +162,7 @@ public class Section {
 
         // Check if mainSection is available
         if (this.mainSection.size() < 3) {
+            errorOccured("Main section has invalid number of nodes or is not defined.");
             return 0;
         }
 
@@ -160,6 +175,15 @@ public class Section {
         }
 
         area = mainArea - clippingAreas;
+
+        // Check for validity of main and clipping sections
+        if (area < 0) {
+            errorOccured("Invalid setting of section polygons.");
+            return 0;
+        }
+
+        this.hasError = false;
+        this.errMessage = "Success";
         this.area = area;
         return area;
     }
@@ -190,6 +214,7 @@ public class Section {
         double grossArea = grossAreaOfConcrete();
         kd = (maMain - maClippings) / grossArea;
 
+        noError();
         return kd;
     }
 
@@ -203,6 +228,8 @@ public class Section {
         }
 
         area = mainSectionArea - clippingAreas;
+
+        noError();
         return area;
     }
 
@@ -227,6 +254,17 @@ public class Section {
 
         kd = (maMainSection - maClippingSections) / (mainSectionArea - clippingSectionAreas);
 
+        noError();
         return kd;
+    }
+
+    private void noError() {
+        this.hasError = false;
+        this.errMessage = "Success";
+    }
+
+    private void errorOccured(String msg) {
+        this.hasError = true;
+        this.errMessage = msg;
     }
 }
