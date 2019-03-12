@@ -114,7 +114,6 @@ public class BeamAnalyses {
         At += Ac;
         At += (n - 1) * As;
         At += (n - 1) * AsPrime;
-
         // Calculate moments of areas
         double Ma = 0;
         Ma += (n - 1) * As * d;
@@ -133,7 +132,6 @@ public class BeamAnalyses {
         double tensionArea = sectionGeometry.grossAreaOfConcrete() - compressionArea;
         double Cc, Cs, Tc, Ts;                                                // Resultant forces
         double ycc, yct;                                                      // Location of Cc and Tc
-
         Cc = compressionSolidVolumeTriangular(kd, highestElev, fc);
         double[] compressionStrip, tensionStrip;
         double dy = kd / 10000000;
@@ -202,11 +200,11 @@ public class BeamAnalyses {
         double Es = BeamContants.ES;
         double d = this.beamSection.getEffectiveDepth();
         double dPrime = this.beamSection.getSteelCompression().getdPrime(Unit.METRIC);
-        double fs,
+        double fs = 0,
                 fy = this.beamSection.getFy(),
                 As = this.beamSection.getSteelTension().getTotalArea(Unit.METRIC),
                 AsPrime = this.beamSection.getSteelCompression().getTotalArea(Unit.METRIC),
-                fsPrime,
+                fsPrime = fy,
                 Cc = 0,
                 Cs = 0,
                 fcPrime = this.beamSection.getFcPrime(),
@@ -295,7 +293,6 @@ public class BeamAnalyses {
             double beta = calculateBeta(fcPrime);
 
             double a = 1;           // Compression block height
-
             while (AsCalc < As) {
                 kd = a / beta;
                 fs = ⲉcu * Es * (d - kd) / kd;
@@ -314,10 +311,8 @@ public class BeamAnalyses {
                 AsCalc = (Cc + Cs) / fs;
                 a += 0.001;
             }
-
             double compressionCentroid;
             compressionCentroid = section.centroidAboveAxis(kdY);
-
             moment = Cc * (d - compressionCentroid) + Cs * (d - dPrime);
         }
 
